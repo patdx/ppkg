@@ -82,10 +82,21 @@
     }
   },
   "workspace": {
-    "dependencies": [
-      "jsr:@david/dax@0.42",
-      "jsr:@std/fs@^1.0.5",
-      "jsr:@std/path@^1.0.7"
-    ]
+    "members": {
+      "packages/pkg": {
+        "dependencies": [
+          "jsr:@david/dax@0.42",
+          "jsr:@std/fs@^1.0.5",
+          "jsr:@std/path@^1.0.7"
+        ]
+      },
+      "packages/update": {
+        "dependencies": [
+          "jsr:@david/dax@0.42",
+          "jsr:@std/fs@^1.0.5",
+          "jsr:@std/path@^1.0.7"
+        ]
+      }
+    }
   }
 }
