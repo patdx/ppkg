@@ -13,7 +13,9 @@
     "jsr:@std/path@1": "1.0.7",
     "jsr:@std/path@^1.0.7": "1.0.7",
     "jsr:@std/streams@0.221": "0.221.0",
-    "npm:@types/node@*": "22.5.4"
+    "npm:@types/node@*": "22.5.4",
+    "npm:create-desktop-shortcuts@^1.11.0": "1.11.0",
+    "npm:ofetch@^1.4.1": "1.4.1"
   },
   "jsr": {
     "@david/dax@0.42.0": {
@@ -77,8 +79,40 @@
         "undici-types"
       ]
     },
+    "create-desktop-shortcuts@1.11.0": {
+      "integrity": "sha512-nmVtPVqNyMuAyMpDnd7l++hb2laqCWZXnHQaFhqGT1YEi2Ve3unu6QyuyIpGxAwIscNHcG1Ehnl+lFw6ygB2nQ==",
+      "dependencies": [
+        "which"
+      ]
+    },
+    "destr@2.0.3": {
+      "integrity": "sha512-2N3BOUU4gYMpTP24s5rF5iP7BDr7uNTCs4ozw3kf/eKfvWSIu93GEBi5m427YoyJoeOzQ5smuu4nNAPGb8idSQ=="
+    },
+    "isexe@2.0.0": {
+      "integrity": "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw=="
+    },
+    "node-fetch-native@1.6.4": {
+      "integrity": "sha512-IhOigYzAKHd244OC0JIMIUrjzctirCmPkaIfhDeGcEETWof5zKYUW7e7MYvChGWh/4CJeXEgsRyGzuF334rOOQ=="
+    },
+    "ofetch@1.4.1": {
+      "integrity": "sha512-QZj2DfGplQAr2oj9KzceK9Hwz6Whxazmn85yYeVuS3u9XTMOGMRx0kO95MQ+vLsj/S/NwBDMMLU5hpxvI6Tklw==",
+      "dependencies": [
+        "destr",
+        "node-fetch-native",
+        "ufo"
+      ]
+    },
+    "ufo@1.5.4": {
+      "integrity": "sha512-UsUk3byDzKd04EyoZ7U4DOlxQaD14JUKQl6/P7wiX4FNvUfm3XL246n9W5AmqwW5RSFJ27NAuM0iLscAOYUiGQ=="
+    },
     "undici-types@6.19.8": {
       "integrity": "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="
+    },
+    "which@2.0.2": {
+      "integrity": "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==",
+      "dependencies": [
+        "isexe"
+      ]
     }
   },
   "workspace": {
@@ -87,7 +121,9 @@
         "dependencies": [
           "jsr:@david/dax@0.42",
           "jsr:@std/fs@^1.0.5",
-          "jsr:@std/path@^1.0.7"
+          "jsr:@std/path@^1.0.7",
+          "npm:create-desktop-shortcuts@^1.11.0",
+          "npm:ofetch@^1.4.1"
         ]
       },
       "packages/update": {
