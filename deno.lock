@@ -21,6 +21,7 @@
     "jsr:@std/io@0.221": "0.221.0",
     "jsr:@std/json@^1.0.2": "1.0.2",
     "jsr:@std/jsonc@^1.0.2": "1.0.2",
+    "jsr:@std/path@*": "1.1.2",
     "jsr:@std/path@1": "1.1.2",
     "jsr:@std/path@^1.1.1": "1.1.2",
     "jsr:@std/path@^1.1.2": "1.1.2",
@@ -204,13 +205,6 @@
           "jsr:@std/path@^1.1.2",
           "npm:create-desktop-shortcuts@^1.11.1",
           "npm:ofetch@^1.4.1"
-        ]
-      },
-      "packages/update": {
-        "dependencies": [
-          "jsr:@david/dax@0.42",
-          "jsr:@std/fs@^1.0.19",
-          "jsr:@std/path@^1.1.2"
         ]
       }
     }
