@@ -4,18 +4,20 @@ import {
 } from '../../check-updates.ts'
 import { listInstalledPackages } from '../../shared/fs.ts'
 
-export async function handleOutdatedCommand(): Promise<void> {
+export async function handleOutdatedCommand(
+  names: string[] = [],
+): Promise<void> {
   const installed = await listInstalledPackages()
   if (installed.length === 0) {
     console.log('No packages installed')
     return
   }
 
-  const checks = await checkPackageUpdates(installed)
+  const checks = await checkPackageUpdates(installed, { names })
   printUpdateChecks(checks)
 
   const outdated = checks.filter((check) => check.status === 'outdated')
-  if (outdated.length > 0) {
+  if (outdated.length > 0 || checks.some((check) => check.status === 'error')) {
     process.exit(1)
   }
 }

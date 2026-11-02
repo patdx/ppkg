@@ -7,7 +7,9 @@ export function printHelp(): void {
 Commands:
   add <name|url>      Install a known package or binary from URL
   list                List installed and available packages
-  outdated            Show installed packages with available updates
+  outdated [name...]  Show installed packages with available updates
+  check [name...]     Alias for outdated
+  upgrade [name...]   Alias for update
   update [name...]    Update outdated packages (or named packages)
   remove <pkg>        Remove an installed package
   repo list           List configured remote repos
@@ -18,6 +20,8 @@ Commands:
   self-update         Reinstall latest @patdx/ppkg as ppkg
 
 Options:
+  --verbose          Show internal diagnostics
+  --dry-run          Preview update without installing
   --url <url>         URL to download the binary from (can also be provided as first argument)
   --name <name>       Name for the binary (default: extracted from URL)
   --version <ver>     Specific version to install (default: latest)

@@ -294,6 +294,8 @@ test('analyzeAssets - Additional scoring patterns', () => {
 })
 
 test('findViableAsset - Multiple viable assets', () => {
+  const previousVerbose = process.env.PPKG_VERBOSE
+  process.env.PPKG_VERBOSE = '1'
   const testAssets: GithubRelease['assets'] = [
     {
       name: 'app-cli-linux-amd64.zip',
@@ -312,10 +314,10 @@ test('findViableAsset - Multiple viable assets', () => {
   const context = { platform: 'linux', arch: 'x64' }
   const analysis = analyzeAssets(testAssets, context)
 
-  // Capture console.warn output
-  const originalWarn = console.warn
+  // Capture console.error output
+  const originalWarn = console.error
   let warnOutput = ''
-  console.warn = (msg: string) => {
+  console.error = (msg: string) => {
     warnOutput = msg
   }
 
@@ -344,8 +346,10 @@ test('findViableAsset - Multiple viable assets', () => {
       ),
     )
   } finally {
-    // Restore original console.warn
-    console.warn = originalWarn
+    // Restore original console.error
+    console.error = originalWarn
+    if (previousVerbose === undefined) delete process.env.PPKG_VERBOSE
+    else process.env.PPKG_VERBOSE = previousVerbose
   }
 })
 
@@ -381,8 +385,8 @@ const codexbarAssets: GithubRelease['assets'] = [
 
 test('findViableAsset - CodexBar CLI prefers glibc on gnu hosts', () => {
   const context = { platform: 'linux', arch: 'x64', libc: 'gnu' as const }
-  const originalWarn = console.warn
-  console.warn = () => {}
+  const originalWarn = console.error
+  console.error = () => {}
 
   try {
     const asset = findViableAsset(
@@ -391,14 +395,14 @@ test('findViableAsset - CodexBar CLI prefers glibc on gnu hosts', () => {
     )
     assertEquals(asset?.name, 'CodexBarCLI-v0.45.2-linux-x86_64.tar.gz')
   } finally {
-    console.warn = originalWarn
+    console.error = originalWarn
   }
 })
 
 test('findViableAsset - CodexBar CLI prefers musl on musl hosts', () => {
   const context = { platform: 'linux', arch: 'x64', libc: 'musl' as const }
-  const originalWarn = console.warn
-  console.warn = () => {}
+  const originalWarn = console.error
+  console.error = () => {}
 
   try {
     const asset = findViableAsset(
@@ -407,6 +411,6 @@ test('findViableAsset - CodexBar CLI prefers musl on musl hosts', () => {
     )
     assertEquals(asset?.name, 'CodexBarCLI-v0.45.2-linux-musl-x86_64.tar.gz')
   } finally {
-    console.warn = originalWarn
+    console.error = originalWarn
   }
 })

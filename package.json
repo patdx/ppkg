@@ -1,6 +1,6 @@
 {
   "name": "@patdx/ppkg",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "Install and manage binary packages on Linux and macOS",
   "type": "module",
   "license": "MIT",

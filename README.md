@@ -165,3 +165,21 @@ Builds and packaging use pnpm; npm's CLI uploads the completed tarball with
 Catalog deployment uses Cloudflare Workers Builds from `patdx/ppkg` on `main`.
 It is independent of npm publication, so catalog updates need no CLI release.
 The configuration is documented in [repo-tools](repo-tools/README.md).
+
+### Checking and updating installed packages
+
+Run `ppkg outdated` (or `ppkg check`) to check all installed packages, or
+`ppkg outdated blender codexbar` to check a selected list. Checks return a
+nonzero exit status when updates are available or a provider check fails.
+This compares release versions; it does not verify installed file integrity.
+
+Run `ppkg update --dry-run` to preview updates without installing anything.
+Run `ppkg update` to update all outdated catalog packages, or
+`ppkg update codexbar blender` for selected packages. `upgrade` is an alias
+for `update`. Packages installed from arbitrary URLs cannot be automatically
+updated without a catalog entry and are reported as skipped.
+
+Normal output shows package status and installation results. Use `--verbose`
+(or `PPKG_VERBOSE=1`) for download paths and release-asset diagnostics.
+Use `ppkg --version` to see the CLI version and `ppkg self-update` to update
+the CLI itself.

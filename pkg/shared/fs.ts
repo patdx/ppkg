@@ -1,3 +1,4 @@
+import { debug } from './log.ts'
 import { mkdtempSync, rmSync, createWriteStream } from 'node:fs'
 import { readdir, readlink, rename, rm, writeFile } from 'node:fs/promises'
 import { copy, exists, move } from './fs-utils.ts'
@@ -33,7 +34,7 @@ export async function ensureBinInPath() {
       ? join(getHomeDir() || '', '.zshrc')
       : join(getHomeDir() || '', '.bashrc')
 
-    console.log(`Detected shell: ${isZsh ? 'zsh' : 'bash'}`)
+    debug(`Detected shell: ${isZsh ? 'zsh' : 'bash'}`)
 
     await writeFile(shellRcFile, `\nexport PATH="$PATH:${LOCAL_BIN_DIR}"\n`, {
       flag: 'a',
@@ -47,7 +48,7 @@ export async function ensureBinInPath() {
 }
 
 export async function downloadToFile(url: string, filePath: string) {
-  console.log(`Downloading file from ${url} to ${filePath}`)
+  debug(`Downloading file from ${url} to ${filePath}`)
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(
@@ -73,7 +74,7 @@ export async function downloadToFile(url: string, filePath: string) {
     throw error
   }
 
-  console.log(`Downloaded file to ${filePath}`)
+  debug(`Downloaded file to ${filePath}`)
 }
 
 async function runArchiveCommand(tool: string, args: string[]): Promise<void> {
@@ -127,7 +128,7 @@ export class TempDir implements Disposable {
   }
 
   [Symbol.dispose]() {
-    console.log(`Removing temporary path ${this.path}`)
+    debug(`Removing temporary path ${this.path}`)
     rmSync(this.path, { recursive: true })
   }
 }
@@ -139,7 +140,7 @@ export async function tryMove(
     overwrite?: boolean
   },
 ): Promise<void> {
-  console.log(`Moving ${from} to ${to}`)
+  debug(`Moving ${from} to ${to}`)
 
   try {
     await move(from, to, { overwrite: options?.overwrite })

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { PKG_CLI_VERSION } from './shared/version.ts'
 import { parseArgs } from 'node:util'
 import { realpathSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -15,12 +16,18 @@ import {
 } from './cli/commands/mod.ts'
 
 export async function main(inputArgs: string[]): Promise<void> {
+  if (inputArgs.length === 1 && inputArgs[0] === '--version') {
+    console.log(PKG_CLI_VERSION)
+    return
+  }
   await maybeNotifyPkgUpdate()
 
   const { values: args, positionals } = parseArgs({
     args: inputArgs,
     allowPositionals: true,
     options: {
+      verbose: { type: 'boolean' },
+      'dry-run': { type: 'boolean' },
       url: { type: 'string' },
       'url-provider': { type: 'string' },
       version: { type: 'string' },
@@ -28,6 +35,8 @@ export async function main(inputArgs: string[]): Promise<void> {
       help: { type: 'boolean', short: 'h' },
     },
   })
+
+  if (args.verbose) process.env.PPKG_VERBOSE = '1'
 
   if (args.help) {
     printHelp()
@@ -54,16 +63,16 @@ export async function main(inputArgs: string[]): Promise<void> {
     return
   }
 
-  if (command === 'outdated') {
-    await handleOutdatedCommand()
+  if (command === 'outdated' || command === 'check') {
+    await handleOutdatedCommand(positionals.slice(1))
     return
   }
 
-  if (command === 'update') {
+  if (command === 'update' || command === 'upgrade') {
     const names = [subcommand, ...rest].filter(
       (value): value is string => typeof value === 'string',
     )
-    await handleUpdateCommand(names)
+    await handleUpdateCommand(names, { dryRun: args['dry-run'] })
     return
   }
 

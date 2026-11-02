@@ -1,3 +1,4 @@
+import { debug } from './shared/log.ts'
 import { chmod, mkdir, readlink, rm, symlink } from 'node:fs/promises'
 import { extractTarXz } from './shared/fs.ts'
 /**
@@ -46,11 +47,11 @@ async function downloadAndExtractFile(
     const filename = fileOptions.filename || basename(resolvedFile.binaryUrl)
     const targetPath = join(installVersionDir, filename)
 
-    console.log(`Downloading ${fileOptions.url} to ${targetPath}`)
+    debug(`Downloading ${fileOptions.url} to ${targetPath}`)
     await downloadToFile(resolvedFile.binaryUrl, targetPath)
 
     if (fileOptions.executable) {
-      console.log(`Making ${targetPath} executable`)
+      debug(`Making ${targetPath} executable`)
       await chmod(targetPath, 0o755)
     }
     return
@@ -81,7 +82,7 @@ async function downloadAndExtractFile(
   }
 
   const processingDir = await getProcessingDir(extractDir)
-  console.log(`Processing directory: ${processingDir}`)
+  debug(`Processing directory: ${processingDir}`)
 
   await tryMove(processingDir, installVersionDir, { overwrite: true })
 }
@@ -91,7 +92,7 @@ async function linkCurrentVersion(
   installVersionDir: string,
   installCurrentDir: string,
 ): Promise<string> {
-  console.log(`Linking ${installCurrentDir} to ${installVersionDir}`)
+  debug(`Linking ${installCurrentDir} to ${installVersionDir}`)
   if (await exists(installCurrentDir)) {
     await rm(installCurrentDir, { recursive: true })
   }
@@ -101,7 +102,7 @@ async function linkCurrentVersion(
   const localBinPath = join(LOCAL_BIN_DIR, binaryName)
   const binaryPath = join(installCurrentDir, binaryName)
 
-  console.log(`Linking ${localBinPath} to ${binaryPath}`)
+  debug(`Linking ${localBinPath} to ${binaryPath}`)
   if (await exists(localBinPath)) {
     await rm(localBinPath)
   }
@@ -137,7 +138,7 @@ function createShortcut(
     },
   })
 
-  console.log(`Shortcut created: ${success}`)
+  debug(`Shortcut created: ${success}`)
 }
 
 export async function downloadAndInstall(install: InstallOptions) {

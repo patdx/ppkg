@@ -71,3 +71,13 @@ test('pkg help lists outdated and update', async () => {
   assert(stdout.includes('outdated'), stdout)
   assert(stdout.includes('update [name...]'), stdout)
 })
+
+test('CLI reports its version and validates named checks', async () => {
+  const cliPath = new URL('./cli.js', import.meta.url).pathname
+  const exec = promisify(execFile)
+  const version = await exec(process.execPath, [cliPath, '--version'])
+  assert(/^\d+\.\d+\.\d+\s*$/.test(version.stdout))
+  const help = await exec(process.execPath, [cliPath, '--help'])
+  assert(help.stdout.includes('--dry-run'))
+  assert(help.stdout.includes('check [name...]'))
+})

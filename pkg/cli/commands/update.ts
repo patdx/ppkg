@@ -5,7 +5,10 @@ import {
 import { downloadAndInstall } from '../../install-binary.ts'
 import { listInstalledPackages } from '../../shared/fs.ts'
 
-export async function handleUpdateCommand(names: string[]): Promise<void> {
+export async function handleUpdateCommand(
+  names: string[],
+  options: { dryRun?: boolean } = {},
+): Promise<void> {
   const installed = await listInstalledPackages()
   if (installed.length === 0) {
     console.log('No packages installed')
@@ -48,6 +51,19 @@ export async function handleUpdateCommand(names: string[]): Promise<void> {
     if (checks.some((check) => check.status === 'error')) {
       process.exit(1)
     }
+    return
+  }
+
+  if (options.dryRun) {
+    for (const check of toUpdate) {
+      console.log(
+        check.status === 'current'
+          ? `  ${check.name}: ${check.installed} (up to date)`
+          : `  ${check.name}: ${check.installed} → ${check.available}`,
+      )
+    }
+    console.log('Preview only; no packages changed')
+    if (checks.some((check) => check.status === 'error')) process.exitCode = 1
     return
   }
 

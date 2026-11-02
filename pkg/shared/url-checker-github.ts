@@ -1,3 +1,4 @@
+import { debug } from './log.ts'
 import { existsSync } from 'node:fs'
 import process from 'node:process'
 import { readGithubUrl } from './normalize-github-url.ts'
@@ -211,7 +212,7 @@ export function findViableAsset(
   )
 
   if (viableAssets.length > 1) {
-    console.warn(
+    debug(
       [
         `Warning: Found multiple matching assets for your system:`,
         generateErrorDetails(viableAssets, context),
