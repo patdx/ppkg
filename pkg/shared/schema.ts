@@ -15,6 +15,7 @@ export interface FileOptions {
   filename?: string
   type?: 'zip' | 'targz' | 'tarxz' | 'raw'
   executable?: boolean
+  github_asset?: string
   url_provider?: string
 }
 
@@ -45,6 +46,7 @@ const FileOptionsSchema: v.GenericSchema<FileOptions> = v.object({
   filename: v.optional(v.string()),
   type: v.optional(v.picklist(['zip', 'targz', 'tarxz', 'raw'] as const)),
   executable: v.optional(v.boolean()),
+  github_asset: v.optional(v.string()),
   url_provider: v.optional(v.string()),
 })
 

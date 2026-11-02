@@ -36,6 +36,9 @@
           "executable": {
             "type": "boolean"
           },
+          "github_asset": {
+            "type": "string"
+          },
           "url_provider": {
             "type": "string"
           }

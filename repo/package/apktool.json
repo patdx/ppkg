@@ -5,15 +5,17 @@
   "binary_name": "apktool",
   "files": [
     {
-      "url": "https://raw.githubusercontent.com/iBotPeaches/Apktool/v3.0.3/scripts/linux/apktool",
+      "url": "https://github.com/iBotPeaches/Apktool",
+      "url_provider": "github",
+      "github_asset": "apktool_*.jar",
+      "filename": "apktool.jar",
+      "type": "raw"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/iBotPeaches/Apktool/{release_tag}/scripts/linux/apktool",
       "filename": "apktool",
       "type": "raw",
       "executable": true
-    },
-    {
-      "url": "https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar",
-      "filename": "apktool.jar",
-      "type": "raw"
     }
   ],
   "post_install_message": "apktool has been installed successfully!\nTry running apktool via CLI."

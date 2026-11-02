@@ -21,7 +21,7 @@ import {
   TempDir,
   tryMove,
 } from './shared/fs.ts'
-import { checkUrl } from './shared/url-checker.ts'
+import { type UrlCheckResult, checkUrl } from './shared/url-checker.ts'
 import { guessBinaryName } from './shared/guess-binary-name.ts'
 import type {
   FileOptions,
@@ -40,13 +40,14 @@ import type {
 async function downloadAndExtractFile(
   fileOptions: FileOptions,
   installVersionDir: string,
+  resolvedFile: UrlCheckResult,
 ): Promise<void> {
-  if (fileOptions.type === 'raw') {
-    const filename = fileOptions.filename || basename(fileOptions.url)
+  if ((fileOptions.type ?? resolvedFile.type) === 'raw') {
+    const filename = fileOptions.filename || basename(resolvedFile.binaryUrl)
     const targetPath = join(installVersionDir, filename)
 
     console.log(`Downloading ${fileOptions.url} to ${targetPath}`)
-    await downloadToFile(fileOptions.url, targetPath)
+    await downloadToFile(resolvedFile.binaryUrl, targetPath)
 
     if (fileOptions.executable) {
       console.log(`Making ${targetPath} executable`)
@@ -57,7 +58,6 @@ async function downloadAndExtractFile(
 
   using tempDir = new TempDir()
 
-  const resolvedFile = await checkUrl(fileOptions.url, fileOptions.url_provider)
   const fileType = fileOptions.type ?? resolvedFile.type
   const downloadFilename = `download.${
     fileType === 'targz' ? 'tar.gz' : fileType === 'tarxz' ? 'tar.xz' : 'zip'
@@ -154,10 +154,13 @@ export async function downloadAndInstall(install: InstallOptions) {
   }
 
   const firstFile = files[0]
-  const { binaryUrl, version: detectedVersion } = await checkUrl(
+  const firstResolved = await checkUrl(
     firstFile.url,
     firstFile.url_provider,
+    firstFile,
   )
+
+  const { binaryUrl, version: detectedVersion } = firstResolved
 
   const binaryName = assertManagedPackageName(
     providedBinaryName ?? guessBinaryName(binaryUrl),
@@ -194,7 +197,20 @@ export async function downloadAndInstall(install: InstallOptions) {
     await mkdir(installDir, { recursive: true })
     await mkdir(installVersionDir, { recursive: true })
     for (const fileOptions of files) {
-      await downloadAndExtractFile(fileOptions, installVersionDir)
+      let url = fileOptions.url
+      if (url.includes('{release_tag}')) {
+        if (!firstResolved.releaseTag)
+          throw new Error('release_tag requires a GitHub release')
+        url = url.replaceAll(
+          '{release_tag}',
+          encodeURIComponent(firstResolved.releaseTag),
+        )
+      }
+      const resolved =
+        fileOptions === firstFile
+          ? firstResolved
+          : await checkUrl(url, fileOptions.url_provider, fileOptions)
+      await downloadAndExtractFile(fileOptions, installVersionDir, resolved)
     }
   }
 

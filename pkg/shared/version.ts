@@ -1,1 +1,1 @@
-export const PKG_CLI_VERSION = '0.11.1'
+export const PKG_CLI_VERSION = '0.12.0'

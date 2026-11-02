@@ -45,7 +45,7 @@ export async function defaultCheckAvailable(
   if (!first) {
     throw new Error(`Package '${pkg.name}' has no files`)
   }
-  const result = await checkUrl(first.url, first.url_provider)
+  const result = await checkUrl(first.url, first.url_provider, first)
   return result.version ?? 'latest'
 }
 

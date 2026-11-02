@@ -6,7 +6,7 @@ import { urlArchiveType } from './url-archive-type.ts'
 
 export const githubProvider: UrlProvider = {
   name: 'github',
-  check: checkGithubUrl,
+  check: (url, options) => checkGithubUrl(url, undefined, options),
 }
 
 export interface GithubRelease {
@@ -223,9 +223,10 @@ export function findViableAsset(
   return viableAssets[0] || null
 }
 
-async function checkGithubUrl(
+export async function checkGithubUrl(
   url: string,
   context: CheckerContext = { platform: process.platform, arch: process.arch },
+  options?: { github_asset?: string },
 ): Promise<UrlCheckResult | null> {
   const gitHubUrl = readGithubUrl(url)
   if (!gitHubUrl) {
@@ -234,6 +235,29 @@ async function checkGithubUrl(
 
   const release = await fetchGithubRelease(gitHubUrl.repoName)
   if (!release) return null
+
+  if (options?.github_asset) {
+    const pattern = new RegExp(
+      '^' +
+        options.github_asset
+          .split('*')
+          .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+          .join('.*') +
+        '$',
+    )
+    const matches = release.assets.filter((asset) => pattern.test(asset.name))
+    if (matches.length !== 1)
+      throw new Error(
+        `Expected one GitHub asset matching ${options.github_asset}, found ${matches.length}`,
+      )
+    return {
+      binaryUrl: matches[0].browser_download_url,
+      version: release.tag_name.replace(/^v/, ''),
+      releaseTag: release.tag_name,
+      type: 'raw',
+      urlType: 'github',
+    }
+  }
 
   const assetAnalysis = analyzeAssets(release.assets, context)
   const viableAsset = findViableAsset(assetAnalysis, context)
@@ -249,6 +273,7 @@ async function checkGithubUrl(
   return {
     binaryUrl: viableAsset.url,
     version: release.tag_name.replace(/^v/, ''),
+    releaseTag: release.tag_name,
     type: urlArchiveType(viableAsset.url),
     urlType: 'github',
   }

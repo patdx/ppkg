@@ -6,13 +6,17 @@ import { windsurfStableProvider } from './url-checker-windsurf.ts'
 export interface UrlCheckResult {
   binaryUrl: string
   version?: string
-  type: 'zip' | 'targz' | 'tarxz'
+  releaseTag?: string
+  type: 'zip' | 'targz' | 'tarxz' | 'raw'
   urlType: string
 }
 
 export interface UrlProvider {
   name: string
-  check: (url: string) => Promise<UrlCheckResult | null> | UrlCheckResult | null
+  check: (
+    url: string,
+    options?: { github_asset?: string },
+  ) => Promise<UrlCheckResult | null> | UrlCheckResult | null
 }
 
 const providers: UrlProvider[] = [
@@ -25,13 +29,14 @@ const providers: UrlProvider[] = [
 export async function checkUrl(
   url: string,
   preferredProvider?: string,
+  options?: { github_asset?: string },
 ): Promise<UrlCheckResult> {
   if (preferredProvider) {
     const provider = providers.find((p) => p.name === preferredProvider)
     if (!provider) {
       throw new Error(`Unknown provider: ${preferredProvider}`)
     }
-    const result = await provider.check(url)
+    const result = await provider.check(url, options)
     if (result) return result
     throw new Error(
       `Preferred provider '${preferredProvider}' could not handle URL: ${url}`,
@@ -39,7 +44,7 @@ export async function checkUrl(
   }
 
   for (const provider of providers) {
-    const result = await provider.check(url)
+    const result = await provider.check(url, options)
     if (result) return result
   }
 
