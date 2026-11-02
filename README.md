@@ -79,6 +79,9 @@ node dist/pkg/cli.js --help
 pnpm pack
 ```
 
+Refresh the workflow actions with `pnpm run update:actions`. This uses pnpm’s
+`--include-github-actions` mode and maintains commit SHA pins with version comments.
+
 Edit catalog manifests under `repo/package/*.json`, then run `pnpm run gen-site`.
 Valibot schemas in `pkg/shared/schema.ts` generate `repo/*.schema.json`.
 `pnpm run bump-version patch` updates package.json, the CLI

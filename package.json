@@ -30,7 +30,8 @@
     "deploy:dry": "pnpm run gen-site && wrangler deploy --dry-run",
     "prepack": "pnpm run build && node scripts/prepare-package.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "update:actions": "pnpm update --include-github-actions --latest actions/checkout actions/setup-node pnpm/action-setup"
   },
   "dependencies": {
     "@valibot/to-json-schema": "^1.7.1",

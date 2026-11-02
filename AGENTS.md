@@ -7,6 +7,7 @@ Standalone TypeScript CLI for Linux/macOS, using the latest Node.js LTS line and
 - Keep package engines and `@types/node` aligned when updating the Node LTS line.
 - Source: `pkg/`; generated JavaScript: `dist/pkg/`.
 - Catalog: `repo/`; generator: `repo-tools/`; Wrangler config: `wrangler.json`.
+- Refresh workflow action SHA pins with `pnpm run update:actions`.
 - Run `pnpm test` and `pnpm run check-schema` after code changes.
 - Run `pnpm run gen-site` after catalog or installation-documentation changes.
 - Preserve existing `~/.ppkg` configuration and installed-package layouts.
