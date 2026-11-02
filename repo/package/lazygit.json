@@ -1,0 +1,12 @@
+{
+  "$schema": "https://repo.pmil.me/package.schema.json",
+  "version": 1,
+  "name": "lazygit",
+  "binary_name": "lazygit",
+  "files": [
+    {
+      "url": "https://github.com/jesseduffield/lazygit",
+      "url_provider": "github"
+    }
+  ]
+}
