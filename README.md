@@ -83,8 +83,8 @@ version, and generated catalog pages. The catalog minimum CLI version is an
 independent compatibility requirement; change it only when needed.
 
 `pnpm run deploy:dry` validates the Cloudflare catalog deployment. `pnpm run deploy`
-publishes to the existing Worker and domain; use only after moving deployment
-ownership from dotfiles-public. See [repo-tools](repo-tools/README.md).
+publishes to the existing Worker and domain. Cloudflare Workers Builds deploys
+the catalog from this repository. See [repo-tools](repo-tools/README.md).
 
 ## Repository migration
 
@@ -122,5 +122,6 @@ release to its GitHub source commit and build workflow. The trusted publisher fo
 Builds and packaging use pnpm; npm's CLI uploads the completed tarball with
 `--provenance`. No npm token is stored in GitHub.
 
-Catalog deployment remains manual. Transfer its secrets and deployment ownership
-from dotfiles-public before running the deployment workflow.
+Catalog deployment uses Cloudflare Workers Builds from `patdx/ppkg` on `main`.
+It is independent of npm publication, so catalog updates need no CLI release.
+The configuration is documented in [repo-tools](repo-tools/README.md).

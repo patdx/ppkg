@@ -26,8 +26,8 @@
     "gen-schema": "pnpm run build && node dist/pkg/scripts/gen-schema.js",
     "gen-site": "pnpm run build && node dist/repo-tools/scripts/gen-site.js",
     "bump-version": "pnpm run build && node dist/pkg/scripts/bump-version.js",
-    "deploy": "pnpm run gen-site && wrangler deploy --config repo-tools/wrangler.json",
-    "deploy:dry": "pnpm run gen-site && wrangler deploy --config repo-tools/wrangler.json --dry-run",
+    "deploy": "pnpm run gen-site && wrangler deploy",
+    "deploy:dry": "pnpm run gen-site && wrangler deploy --dry-run",
     "prepack": "pnpm run build && node scripts/prepare-package.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
