@@ -1,20 +1,23 @@
 # ppkg
 
-Install and manage binary packages on Linux and macOS from URLs or a JSON catalog.
-The default catalog is https://repo.pmil.me.
+[![npm version](https://img.shields.io/npm/v/%40patdx%2Fppkg)](https://www.npmjs.com/package/@patdx/ppkg)
+[![CI](https://github.com/patdx/ppkg/actions/workflows/publish.yml/badge.svg?branch=main)](https://github.com/patdx/ppkg/actions/workflows/publish.yml)
 
-The npm package has zero runtime dependencies. esbuild bundles the CLI and its
-libraries into `dist/ppkg.js`; TypeScript declarations and bundled dependency
-license notices are included alongside it. Node.js and the system archive tools
-below are still required. The `./install-binary` and `./resolve` library exports
-continue to work, both backed by that same JavaScript file.
+Install and manage binary packages on Linux and macOS from a
+[package catalog](https://repo.pmil.me) or a direct URL.
+
+Published on npm as **[@patdx/ppkg](https://www.npmjs.com/package/@patdx/ppkg)**;
+the command is `ppkg`. Zero npm runtime dependencies, with
+[build provenance](https://www.npmjs.com/package/@patdx/ppkg) from GitHub Actions.
 
 ## Requirements and installation
 
-Requires Node.js 26.13 or newer within the Node 26 LTS line, and npm. Archive extraction uses `tar` (with xz
-support for `.tar.xz`) or `unzip` on your system. Windows is not supported.
+Requires [Node.js 26 LTS](https://nodejs.org/en/download) (26.13.0 or newer within
+the 26.x line) and npm. Only the latest Node LTS line is officially supported.
+Archive extraction uses system `tar` (including xz support for `.tar.xz`) or
+`unzip`. Windows is not supported.
 
-Install from npm:
+Install [the npm package](https://www.npmjs.com/package/@patdx/ppkg):
 
 ```sh
 npm install --global @patdx/ppkg
@@ -22,9 +25,20 @@ npm install --global @patdx/ppkg
 npx @patdx/ppkg add caddy
 ```
 
-The executable remains `ppkg`. If an older Deno installation takes precedence,
-check `command -v ppkg`, then remove that old launcher with `deno uninstall -g ppkg`
-and install the Node version. This does not remove managed packages.
+### Migrating from Deno / JSR
+
+Install the npm package above first. After it succeeds, remove the old Deno
+launcher and refresh your shell's command cache:
+
+```sh
+deno uninstall -g ppkg
+hash -r
+command -v ppkg
+```
+
+If the Deno CLI still runs, use `type -a ppkg` to inspect your PATH. Your existing
+`~/.ppkg` configuration, installed packages, and `~/.local/bin` links are preserved.
+The final legacy JSR release is [@patdx/pkg@0.9.1](https://jsr.io/@patdx/pkg@0.9.1).
 
 ## Usage
 
@@ -42,8 +56,7 @@ ppkg repo update
 ppkg self-update
 ```
 
-`self-install` and `self-update` install the latest `@patdx/ppkg` from npm; they
-use the npm release. They do not reinstall the old JSR package.
+`ppkg self-update` installs the latest npm release. `self-install` is an alias.
 
 Existing data stays in `~/.ppkg/`, executable symlinks in `~/.local/bin/`, and
 shortcuts in `~/.local/share/applications/`. Configured repositories and cached
@@ -86,6 +99,12 @@ pnpm pack --pack-destination release
 pnpm run check-package release/*.tgz
 ```
 
+esbuild bundles the CLI and its runtime libraries into one `dist/ppkg.js` file.
+The published package also includes TypeScript declarations and third-party
+license notices. The `./install-binary` and `./resolve` library exports share that
+bundle and support both ESM and CommonJS consumers. The schema generator
+`@valibot/to-json-schema` is development-only and excluded from the bundle.
+
 Tooling under `scripts/` runs directly as TypeScript on Node 26. The development
 build also emits unbundled modules under `dist/pkg/` for source tests and catalog
 tooling; only the single-file bundle, public declarations, README, and dependency
@@ -110,8 +129,9 @@ the catalog from this repository. See [repo-tools](repo-tools/README.md).
 
 This repository was extracted from `patdx/dotfiles-public` with `git filter-repo`,
 retaining history for `pkg/`, `repo/`, `repo-tools/`, and catalog deployment CI.
-The old repository and its JSR releases are unchanged. The new npm package name
-is `@patdx/ppkg`; historical Deno releases remain `@patdx/pkg` on JSR.
+The final Deno/JSR release, `@patdx/pkg@0.9.1`, directs users to npm. Historical
+versions remain available on JSR; ongoing CLI releases and catalog deployment
+are maintained here.
 
 ## CI and releases
 

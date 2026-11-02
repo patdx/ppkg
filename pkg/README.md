@@ -1,5 +1,6 @@
 # ppkg CLI source
 
+The published CLI is [@patdx/ppkg on npm](https://www.npmjs.com/package/@patdx/ppkg).
 See the [project README](../README.md) for installation, commands, and migration
 notes. This directory contains the TypeScript CLI, binary installer, providers,
 catalog resolver, schemas, and Node test suite.
