@@ -6,10 +6,14 @@ const target = process.argv[2]
 if (!target || !/^(major|minor|patch|[0-9]+\.[0-9]+\.[0-9]+)$/.test(target)) {
   throw new Error('Usage: pnpm run bump-version <major|minor|patch|x.y.z>')
 }
-execFileSync('pnpm', ['version', target, '--no-git-tag-version'], {
-  cwd: PROJECT_ROOT,
-  stdio: 'inherit',
-})
+execFileSync(
+  'pnpm',
+  ['version', target, '--no-git-tag-version', '--no-git-checks'],
+  {
+    cwd: PROJECT_ROOT,
+    stdio: 'inherit',
+  },
+)
 const { version } = JSON.parse(
   await readFile(join(PROJECT_ROOT, 'package.json'), 'utf8'),
 )

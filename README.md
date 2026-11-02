@@ -45,7 +45,19 @@ catalog documents keep their existing formats. `PPKG_REPOS` is a comma-separated
 list of catalog URLs or paths that overrides all default sources.
 Set `PPKG_NO_UPDATE_CHECK=1` to disable the optional npm update notice.
 
-The bundled catalog is checked first, followed by configured repositories.
+The CLI uses `https://repo.pmil.me` by default, or your configured repositories
+in order. No catalog is bundled in the npm package, and a checkout's `repo/`
+directory is only used when explicitly configured. Remote catalog documents are
+cached for one hour; `ppkg repo update` refreshes them immediately. Catalog changes
+therefore reach users without a CLI release. New provider code still requires a
+CLI release.
+
+To use the local catalog during development:
+
+```sh
+PPKG_REPOS=./repo node dist/pkg/cli.js list
+```
+
 `outdated` exits with status 1 when updates are available. `update` skips packages
 installed directly from URLs and reports provider failures.
 

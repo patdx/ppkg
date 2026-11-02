@@ -1,5 +1,5 @@
 /**
- * Resolve a package name across configured repos (and optional builtin).
+ * Resolve a package name across configured repos.
  */
 import type { InstallOptions } from './shared/schema.ts'
 import { fetchPackageDocument, fetchRepoListing } from './shared/repo-fetch.ts'

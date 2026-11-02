@@ -1,6 +1,6 @@
 {
   "name": "@patdx/ppkg",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "Install and manage binary packages on Linux and macOS",
   "type": "module",
   "license": "MIT",
@@ -16,9 +16,6 @@
   },
   "files": [
     "dist/pkg",
-    "repo/repo.json",
-    "repo/package/*.json",
-    "repo/*.schema.json",
     "README.md"
   ],
   "scripts": {

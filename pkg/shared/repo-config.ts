@@ -1,5 +1,4 @@
 import { readFile, writeFile } from 'node:fs/promises'
-import { PROJECT_ROOT } from './project.ts'
 /**
  * Config loading and repo source resolution for @patdx/pkg.
  */
@@ -18,7 +17,7 @@ export interface PkgConfig {
   repos: RepoConfigEntry[]
 }
 
-/** A catalog source after builtin discovery + config merge. */
+/** A configured catalog source. */
 export interface RepoSource {
   /** Normalized base URL or filesystem path. */
   base: string
@@ -75,35 +74,13 @@ export function normalizeRepoBase(url: string): string {
   return url.replace(/\/+$/, '')
 }
 
-/**
- * Optional catalog bundled with the npm package or present in the checkout.
- */
-async function discoverBuiltinRepoBase(): Promise<string | null> {
-  const dir = join(PROJECT_ROOT, 'repo')
-  if (!(await exists(join(dir, 'repo.json')))) return null
-  return normalizeRepoBase(dir)
-}
-
-/**
- * Builtin (if present) first, then configured repos; duplicates skipped.
- * `PPKG_REPOS` is a full override — builtin is omitted so the env list
- * is the complete source of truth.
- */
+/** Configured repos in order, with normalized duplicates skipped. */
 export async function getRepoSources(
   config?: PkgConfig,
 ): Promise<RepoSource[]> {
-  const fromEnv = Boolean(process.env['PPKG_REPOS']?.trim())
   const cfg = config ?? (await loadConfig())
   const sources: RepoSource[] = []
   const seen = new Set<string>()
-
-  if (!fromEnv) {
-    const builtin = await discoverBuiltinRepoBase()
-    if (builtin) {
-      seen.add(builtin)
-      sources.push({ base: builtin, label: `builtin:${builtin}` })
-    }
-  }
 
   for (const entry of cfg.repos) {
     const base = normalizeRepoBase(entry.url)
