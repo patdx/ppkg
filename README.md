@@ -8,17 +8,7 @@ The default catalog is https://repo.pmil.me.
 Requires Node.js 22.18 or newer and npm. Archive extraction uses `tar` (with xz
 support for `.tar.xz`) or `unzip` on your system. Windows is not supported.
 
-The Node package is being prepared for its first npm release. Until it is
-published, install from this checkout:
-
-```sh
-npm ci
-npm run build
-npm install --global .
-ppkg --help
-```
-
-After publication:
+Install from npm:
 
 ```sh
 npm install --global @patdx/ppkg
@@ -47,7 +37,7 @@ ppkg self-update
 ```
 
 `self-install` and `self-update` install the latest `@patdx/ppkg` from npm; they
-require the first npm release to exist. They do not reinstall the old JSR package.
+use the npm release. They do not reinstall the old JSR package.
 
 Existing data stays in `~/.ppkg/`, executable symlinks in `~/.local/bin/`, and
 shortcuts in `~/.local/share/applications/`. Configured repositories and cached
@@ -89,6 +79,6 @@ retaining history for `pkg/`, `repo/`, `repo-tools/`, and catalog deployment CI.
 The old repository and its JSR releases are unchanged. The new npm package name
 is `@patdx/ppkg`; historical Deno releases remain `@patdx/pkg` on JSR.
 
-Before the first release, create the GitHub repository, configure npm publishing,
-and transfer catalog deployment secrets. The default CI validates changes and
-builds a package; publishing and catalog deployment are manual workflows.
+The default CI validates changes and builds a package. Publishing and catalog
+deployment are manual workflows. Configure npm trusted publishing before using
+the publish workflow, and transfer catalog deployment secrets before deploying.
