@@ -3,6 +3,12 @@
 Install and manage binary packages on Linux and macOS from URLs or a JSON catalog.
 The default catalog is https://repo.pmil.me.
 
+The npm package has zero runtime dependencies. esbuild bundles the CLI and its
+libraries into `dist/ppkg.js`; TypeScript declarations and bundled dependency
+license notices are included alongside it. Node.js and the system archive tools
+below are still required. The `./install-binary` and `./resolve` library exports
+continue to work, both backed by that same JavaScript file.
+
 ## Requirements and installation
 
 Requires Node.js 26.13 or newer within the Node 26 LTS line, and npm. Archive extraction uses `tar` (with xz
@@ -55,7 +61,7 @@ CLI release.
 To use the local catalog during development:
 
 ```sh
-PPKG_REPOS=./repo node dist/pkg/cli.js list
+PPKG_REPOS=./repo node dist/ppkg.js list
 ```
 
 `outdated` exits with status 1 when updates are available. `update` skips packages
@@ -75,9 +81,17 @@ pnpm run check-schema
 pnpm run format:check
 pnpm run gen-schema
 pnpm run gen-site
-node dist/pkg/cli.js --help
-pnpm pack
+node dist/ppkg.js --help
+pnpm pack --pack-destination release
+pnpm run check-package release/*.tgz
 ```
+
+Tooling under `scripts/` runs directly as TypeScript on Node 26. The development
+build also emits unbundled modules under `dist/pkg/` for source tests and catalog
+tooling; only the single-file bundle, public declarations, README, and dependency
+license notices are published. `pnpm run check-package <tarball>` installs a
+packed release offline into a temporary directory and verifies its CLI and API
+entry points without fetching dependencies.
 
 Refresh the workflow actions with `pnpm run update:actions`. This uses pnpm’s
 `--include-github-actions` mode and maintains commit SHA pins with version comments.

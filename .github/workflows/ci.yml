@@ -27,4 +27,5 @@ jobs:
       - run: pnpm run check-schema
       - run: pnpm run gen-site
       - run: git diff --exit-code -- repo
-      - run: pnpm pack --dry-run
+      - run: pnpm pack --pack-destination "$RUNNER_TEMP/ppkg-package"
+      - run: pnpm run check-package "$RUNNER_TEMP"/ppkg-package/*.tgz

@@ -2,7 +2,10 @@ import { appendFile, readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-export async function needsRelease({ name, version }, fetchMetadata = fetch) {
+export async function needsRelease(
+  { name, version }: { name: string; version: string },
+  fetchMetadata: typeof fetch = fetch,
+): Promise<boolean> {
   const url = `https://registry.npmjs.org/${encodeURIComponent(name)}/${encodeURIComponent(version)}`
   const response = await fetchMetadata(url, {
     signal: AbortSignal.timeout(30_000),
@@ -10,7 +13,10 @@ export async function needsRelease({ name, version }, fetchMetadata = fetch) {
   if (response.status === 404) return true
   if (!response.ok)
     throw new Error(`Cannot check npm release: HTTP ${response.status}`)
-  const published = await response.json()
+  const published = (await response.json()) as {
+    name?: string
+    version?: string
+  }
   if (published.name !== name || published.version !== version) {
     throw new Error('npm returned unexpected package metadata')
   }

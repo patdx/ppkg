@@ -30,7 +30,7 @@ jobs:
           cache: pnpm
       - name: Check whether this version is already published
         id: release
-        run: node scripts/check-release.mjs
+        run: node scripts/check-release.ts
       - name: Install dependencies
         if: steps.release.outputs.publish == 'true'
         run: pnpm install --frozen-lockfile

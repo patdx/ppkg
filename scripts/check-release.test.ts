@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { needsRelease } from './check-release.mjs'
+import { needsRelease } from './check-release.ts'
 const pkg = { name: '@patdx/ppkg', version: '0.10.0' }
 
 test('skip an existing version', async () => {

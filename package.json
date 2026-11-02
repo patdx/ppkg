@@ -1,6 +1,6 @@
 {
   "name": "@patdx/ppkg",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "Install and manage binary packages on Linux and macOS",
   "type": "module",
   "license": "MIT",
@@ -8,19 +8,27 @@
     "node": "^26.13.0"
   },
   "bin": {
-    "ppkg": "dist/pkg/cli.js"
+    "ppkg": "dist/ppkg.js"
   },
   "exports": {
-    "./install-binary": "./dist/pkg/install-binary.js",
-    "./resolve": "./dist/pkg/resolve.js"
+    "./install-binary": {
+      "types": "./dist/types/install-binary.d.ts",
+      "default": "./dist/ppkg.js"
+    },
+    "./resolve": {
+      "types": "./dist/types/resolve.d.ts",
+      "default": "./dist/ppkg.js"
+    }
   },
   "files": [
-    "dist/pkg",
+    "dist/ppkg.js",
+    "dist/types",
+    "dist/THIRD_PARTY_LICENSES.txt",
     "README.md"
   ],
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "test": "pnpm run build && node --test dist/pkg/*.test.js dist/pkg/shared/*.test.js scripts/*.test.mjs",
+    "build": "node scripts/build.ts",
+    "test": "pnpm run build && node --test dist/pkg/*.test.js dist/pkg/shared/*.test.js scripts/*.test.ts",
     "check": "tsc --noEmit",
     "check-schema": "pnpm run build && node dist/pkg/scripts/check-schema.js",
     "gen-schema": "pnpm run build && node dist/pkg/scripts/gen-schema.js",
@@ -28,21 +36,21 @@
     "bump-version": "pnpm run build && node dist/pkg/scripts/bump-version.js",
     "deploy": "pnpm run gen-site && wrangler deploy",
     "deploy:dry": "pnpm run gen-site && wrangler deploy --dry-run",
-    "prepack": "pnpm run build && node scripts/prepare-package.mjs",
+    "prepack": "pnpm run build && node scripts/prepare-package.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "update:actions": "pnpm update --include-github-actions --latest actions/checkout actions/setup-node pnpm/action-setup"
-  },
-  "dependencies": {
-    "@valibot/to-json-schema": "^1.7.1",
-    "create-desktop-shortcuts": "^1.11.1",
-    "ofetch": "^1.5.1",
-    "valibot": "^1.4.2"
+    "update:actions": "pnpm update --include-github-actions --latest actions/checkout actions/setup-node pnpm/action-setup",
+    "check-package": "node scripts/check-package.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
+    "@valibot/to-json-schema": "^1.7.1",
+    "create-desktop-shortcuts": "^1.11.1",
+    "esbuild": "^0.28.2",
+    "ofetch": "^1.5.1",
     "prettier": "^3.9.10",
     "typescript": "^5.9.3",
+    "valibot": "^1.4.2",
     "wrangler": "^4.113.0"
   },
   "repository": {

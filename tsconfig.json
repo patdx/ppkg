@@ -14,5 +14,5 @@
     "sourceMap": true,
     "noEmitOnError": true
   },
-  "include": ["pkg/**/*.ts", "repo-tools/**/*.ts"]
+  "include": ["pkg/**/*.ts", "repo-tools/**/*.ts", "scripts/**/*.ts"]
 }
