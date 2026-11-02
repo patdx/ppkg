@@ -5,7 +5,8 @@ export function assertEquals(
   expected: unknown,
   message?: string,
 ): void {
-  assert.deepStrictEqual(actual, expected, message)
+  if (message === undefined) assert.deepStrictEqual(actual, expected)
+  else assert.deepStrictEqual(actual, expected, message)
 }
 function matches(type?: new (...args: any[]) => Error, message?: string) {
   return (error: unknown): boolean => {

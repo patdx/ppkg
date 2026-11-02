@@ -5,7 +5,7 @@ The default catalog is https://repo.pmil.me.
 
 ## Requirements and installation
 
-Requires Node.js 22.18 or newer and npm. Archive extraction uses `tar` (with xz
+Requires Node.js 26.13 or newer within the Node 26 LTS line, and npm. Archive extraction uses `tar` (with xz
 support for `.tar.xz`) or `unzip` on your system. Windows is not supported.
 
 Install from npm:
@@ -65,7 +65,8 @@ installed directly from URLs and reports provider failures.
 
 Use the Node version in `.node-version` and pnpm 12.16.1 (pinned in
 `packageManager`) for development. GitHub Actions and Cloudflare Builds share
-that Node version; CI also checks compatibility with Node 22.
+that Node version. Only the latest Node LTS line is officially supported and
+tested; older LTS and non-LTS release lines are not supported.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -97,10 +98,10 @@ is `@patdx/ppkg`; historical Deno releases remain `@patdx/pkg` on JSR.
 
 ## CI and releases
 
-Pull requests and branch pushes run tests on Node.js 22 and 24 across Linux and
-macOS, check formatting and schemas, verify generated catalog pages, and build a
+Pull requests and branch pushes run tests on the Node version in `.node-version`
+across Linux and macOS, check formatting and schemas, verify generated catalog pages, and build a
 package. Pushes to `main` run those same checks through the Release workflow.
-After all four jobs pass, Release publishes the version in `package.json` if it
+After both platform jobs pass, Release publishes the version in `package.json` if it
 is not already on npm. Existing versions are skipped. Registry failures stop the
 release rather than treating the version as missing.
 

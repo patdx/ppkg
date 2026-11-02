@@ -1,7 +1,10 @@
 # ppkg
 
-Standalone TypeScript CLI for Linux/macOS, using Node.js >=22.18 and pnpm 12.16.1 for development.
+Standalone TypeScript CLI for Linux/macOS, using the latest Node.js LTS line and pnpm 12.16.1 for development.
 
+- `.node-version` is the canonical Node version for development, CI, and Cloudflare.
+- Support and test only the latest Node LTS line. Do not add older-Node compatibility jobs.
+- Keep package engines and `@types/node` aligned when updating the Node LTS line.
 - Source: `pkg/`; generated JavaScript: `dist/pkg/`.
 - Catalog: `repo/`; generator: `repo-tools/`; Wrangler config: `wrangler.json`.
 - Run `pnpm test` and `pnpm run check-schema` after code changes.

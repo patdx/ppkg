@@ -1,11 +1,11 @@
 {
   "name": "@patdx/ppkg",
-  "version": "0.10.2",
+  "version": "0.11.0",
   "description": "Install and manage binary packages on Linux and macOS",
   "type": "module",
   "license": "MIT",
   "engines": {
-    "node": ">=22.18.0"
+    "node": "^26.13.0"
   },
   "bin": {
     "ppkg": "dist/pkg/cli.js"
@@ -39,7 +39,7 @@
     "valibot": "^1.4.2"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.6.6",
     "prettier": "^3.9.10",
     "typescript": "^5.9.3",
     "wrangler": "^4.113.0"

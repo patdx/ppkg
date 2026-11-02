@@ -9,19 +9,16 @@ permissions:
 
 jobs:
   test:
-    name: test (${{ matrix.node }}, ${{ matrix.os }})
+    name: test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node: [minimum, current]
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          # Keep Node 22 coverage; the primary runtime comes from the file.
-          node-version: ${{ matrix.node == 'minimum' && '22' || '' }}
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
