@@ -1,8 +1,9 @@
-import { assertEquals, assertThrows } from '@std/assert'
+import { test } from 'node:test'
+import { assertEquals, assertThrows } from './test-assert.ts'
 import { parseBlenderDownload } from './url-checker-blender.ts'
 import { urlArchiveType } from './url-archive-type.ts'
 
-Deno.test('Blender resolves stable official download and version', () => {
+test('Blender resolves stable official download and version', () => {
   const html =
     '<a href="https://www.blender.org/download/release/Blender5.2/blender-5.2.1-linux-x64.tar.xz/">Download</a>'
   assertEquals(parseBlenderDownload(html, 'x86_64'), {
@@ -18,11 +19,11 @@ Deno.test('Blender resolves stable official download and version', () => {
     parseBlenderDownload(
       html.replace('5.2.1-linux', '5.2.1-beta-linux'),
       'x86_64',
-    )
+    ),
   )
 })
 
-Deno.test('archive detection handles xz and URL query strings', () => {
+test('archive detection handles xz and URL query strings', () => {
   assertEquals(
     urlArchiveType('https://example.com/blender.tar.xz?download=1'),
     'tarxz',

@@ -11,7 +11,7 @@ export async function handleAddCommand(
       'Error: URL or package name is required. Provide it as --url flag or first argument',
     )
     printHelp()
-    Deno.exit(1)
+    process.exit(1)
   }
 
   const isURL = URL.canParse(specifier)
@@ -20,21 +20,21 @@ export async function handleAddCommand(
     await downloadAndInstall({
       binary_name: args.name,
       version: args.version,
-      files: [{
-        url: specifier,
-        url_provider: args['url-provider'],
-      }],
+      files: [
+        {
+          url: specifier,
+          url_provider: args['url-provider'],
+        },
+      ],
     })
   } else {
     try {
       const knownPackage = await resolvePackage(specifier)
       await downloadAndInstall(knownPackage)
     } catch (error) {
-      console.error(
-        error instanceof Error ? error.message : String(error),
-      )
+      console.error(error instanceof Error ? error.message : String(error))
       printHelp()
-      Deno.exit(1)
+      process.exit(1)
     }
   }
 }

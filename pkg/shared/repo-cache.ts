@@ -20,7 +20,7 @@ export async function updateAllRepoCaches(): Promise<string[]> {
     const listing = await fetchRepoListing(base, { force: true })
     await Promise.all(
       listing.packages.map((name) =>
-        fetchPackageDocument(base, name, { force: true })
+        fetchPackageDocument(base, name, { force: true }),
       ),
     )
     updated.push(base)

@@ -1,5 +1,8 @@
-import { parseArgs } from '@std/cli/parse-args'
-import { maybeNotifyPkgUpdate } from './shared/jsr-update-check.ts'
+#!/usr/bin/env node
+import { parseArgs } from 'node:util'
+import { realpathSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { maybeNotifyPkgUpdate } from './shared/npm-update-check.ts'
 import {
   handleAddCommand,
   handleListCommand,
@@ -11,24 +14,27 @@ import {
   runSelfInstall,
 } from './cli/commands/mod.ts'
 
-async function main(inputArgs: string[]): Promise<void> {
+export async function main(inputArgs: string[]): Promise<void> {
   await maybeNotifyPkgUpdate()
 
-  const args = parseArgs(inputArgs, {
-    string: ['url', 'url-provider', 'version', 'name'],
-    boolean: ['help'],
-    alias: {
-      h: 'help',
-      n: 'name',
+  const { values: args, positionals } = parseArgs({
+    args: inputArgs,
+    allowPositionals: true,
+    options: {
+      url: { type: 'string' },
+      'url-provider': { type: 'string' },
+      version: { type: 'string' },
+      name: { type: 'string', short: 'n' },
+      help: { type: 'boolean', short: 'h' },
     },
   })
 
   if (args.help) {
     printHelp()
-    Deno.exit(0)
+    process.exit(0)
   }
 
-  const [command, subcommand, ...rest] = args._
+  const [command, subcommand, ...rest] = positionals
 
   if (command === 'self-install' || command === 'self-update') {
     await runSelfInstall()
@@ -54,8 +60,9 @@ async function main(inputArgs: string[]): Promise<void> {
   }
 
   if (command === 'update') {
-    const names = [subcommand, ...rest]
-      .filter((value): value is string => typeof value === 'string')
+    const names = [subcommand, ...rest].filter(
+      (value): value is string => typeof value === 'string',
+    )
     await handleUpdateCommand(names)
     return
   }
@@ -64,7 +71,7 @@ async function main(inputArgs: string[]): Promise<void> {
     if (!subcommand || typeof subcommand !== 'string') {
       console.error('Error: Package name is required')
       printHelp()
-      Deno.exit(1)
+      process.exit(1)
     }
     await handleRemoveCommand(subcommand)
     return
@@ -76,9 +83,17 @@ async function main(inputArgs: string[]): Promise<void> {
   }
 
   printHelp()
-  Deno.exit(1)
+  process.exit(1)
 }
 
-if (import.meta.main) {
-  await main(Deno.args)
+if (
+  process.argv[1] &&
+  realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  try {
+    await main(process.argv.slice(2))
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error))
+    process.exitCode = 1
+  }
 }

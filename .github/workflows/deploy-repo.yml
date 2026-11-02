@@ -1,34 +1,21 @@
-# Deploy the declarative package catalog to Cloudflare Workers static assets.
-# Domain repo.pmil.me must be attached in the Cloudflare dashboard when ready.
-
-name: Deploy pkg repo
-
+name: Deploy catalog
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'repo/**'
-      - 'repo-tools/**'
-      - '.github/workflows/deploy-repo.yml'
   workflow_dispatch:
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    env:
-      # Job-level so `if` can skip when unset (secrets cannot be used in `if` directly).
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-
-      - uses: denoland/setup-deno@v2
+      - uses: actions/setup-node@v4
         with:
-          deno-version: v2.x
-
-      - name: Deploy catalog (wrangler via Deno)
-        working-directory: repo-tools
-        if: env.CLOUDFLARE_API_TOKEN != ''
-        run: deno task deploy
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check-schema
+      - run: npm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

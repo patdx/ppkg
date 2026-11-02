@@ -1,0 +1,57 @@
+{
+  "name": "@patdx/ppkg",
+  "version": "0.10.0",
+  "description": "Install and manage binary packages on Linux and macOS",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "bin": {
+    "ppkg": "dist/pkg/cli.js"
+  },
+  "exports": {
+    "./install-binary": "./dist/pkg/install-binary.js",
+    "./resolve": "./dist/pkg/resolve.js"
+  },
+  "files": [
+    "dist/pkg",
+    "repo/repo.json",
+    "repo/package/*.json",
+    "repo/*.schema.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "npm run build && node --test dist/pkg/*.test.js dist/pkg/shared/*.test.js",
+    "check": "tsc --noEmit",
+    "check-schema": "npm run build && node dist/pkg/scripts/check-schema.js",
+    "gen-schema": "npm run build && node dist/pkg/scripts/gen-schema.js",
+    "gen-site": "npm run build && node dist/repo-tools/scripts/gen-site.js",
+    "bump-version": "npm run build && node dist/pkg/scripts/bump-version.js",
+    "deploy": "npm run gen-site && wrangler deploy --config repo-tools/wrangler.json",
+    "deploy:dry": "npm run gen-site && wrangler deploy --config repo-tools/wrangler.json --dry-run",
+    "prepack": "npm run build && node scripts/prepare-package.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@valibot/to-json-schema": "^1.7.1",
+    "create-desktop-shortcuts": "^1.11.1",
+    "ofetch": "^1.5.1",
+    "valibot": "^1.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.113.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patdx/ppkg.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

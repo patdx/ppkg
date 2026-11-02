@@ -1,12 +1,13 @@
-import { assertEquals } from '@std/assert'
+import { test } from 'node:test'
+import { assertEquals } from './test-assert.ts'
 import { guessBinaryName } from './guess-binary-name.ts'
 
-Deno.test('guessBinaryName - simple filename', () => {
+test('guessBinaryName - simple filename', () => {
   const url = 'https://example.com/mycli.zip'
   assertEquals(guessBinaryName(url), 'mycli')
 })
 
-Deno.test('guessBinaryName - with platform and arch', () => {
+test('guessBinaryName - with platform and arch', () => {
   const urls = [
     'https://example.com/mycli-linux-x64.tar.gz',
     'https://example.com/mycli_linux_amd64.zip',
@@ -19,7 +20,7 @@ Deno.test('guessBinaryName - with platform and arch', () => {
   }
 })
 
-Deno.test('guessBinaryName - with version numbers', () => {
+test('guessBinaryName - with version numbers', () => {
   const urls = [
     'https://example.com/mycli-v1.2.3-linux-x64.tar.gz',
     'https://example.com/mycli_1.2.3_linux_amd64.zip',
@@ -31,7 +32,7 @@ Deno.test('guessBinaryName - with version numbers', () => {
   }
 })
 
-Deno.test('guessBinaryName - GitHub release assets', () => {
+test('guessBinaryName - GitHub release assets', () => {
   const urls = [
     'https://github.com/org/repo/releases/download/v1.2.3/mycli-linux-x64.tar.gz',
     'https://github.com/org/repo/releases/download/v1.2.3/mycli_1.2.3_linux_amd64.zip',
@@ -42,7 +43,7 @@ Deno.test('guessBinaryName - GitHub release assets', () => {
   }
 })
 
-Deno.test('guessBinaryName - invalid URL', () => {
+test('guessBinaryName - invalid URL', () => {
   try {
     guessBinaryName('not-a-url')
     throw new Error('Should have thrown for invalid URL')
@@ -54,11 +55,10 @@ Deno.test('guessBinaryName - invalid URL', () => {
   }
 })
 
-Deno.test('guessBinaryName - complex names', () => {
+test('guessBinaryName - complex names', () => {
   const testCases = [
     {
-      url:
-        'https://example.com/git-credential-manager-2.0.935-linux-x64.tar.gz',
+      url: 'https://example.com/git-credential-manager-2.0.935-linux-x64.tar.gz',
       expected: 'git-credential-manager',
     },
     {

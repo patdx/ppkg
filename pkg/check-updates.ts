@@ -4,11 +4,7 @@
 import { type ResolvedPackage, resolvePackage } from './resolve.ts'
 import { checkUrl } from './shared/url-checker.ts'
 
-export type PackageUpdateStatus =
-  | 'outdated'
-  | 'current'
-  | 'skipped'
-  | 'error'
+export type PackageUpdateStatus = 'outdated' | 'current' | 'skipped' | 'error'
 
 export interface InstalledPackageRef {
   name: string

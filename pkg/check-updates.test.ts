@@ -1,4 +1,5 @@
-import { assertEquals, assertRejects } from '@std/assert'
+import { test } from 'node:test'
+import { assertEquals, assertRejects } from './shared/test-assert.ts'
 import {
   type CheckAvailableFn,
   checkPackageUpdates,
@@ -16,14 +17,14 @@ function fakeResolved(name: string): ResolvedPackage {
   }
 }
 
-Deno.test('statusFromVersions uses string equality', () => {
+test('statusFromVersions uses string equality', () => {
   assertEquals(statusFromVersions('1.0.0', '1.0.0'), 'current')
   assertEquals(statusFromVersions('1.0.0', '1.1.0'), 'outdated')
   assertEquals(statusFromVersions('latest', 'latest'), 'current')
   assertEquals(statusFromVersions('v1.0.0', '1.0.0'), 'outdated')
 })
 
-Deno.test('checkPackageUpdates marks outdated and current', async () => {
+test('checkPackageUpdates marks outdated and current', async () => {
   const resolve: ResolvePackageFn = (name) =>
     Promise.resolve(fakeResolved(name))
   const checkAvailable: CheckAvailableFn = (pkg) => {
@@ -40,15 +41,18 @@ Deno.test('checkPackageUpdates marks outdated and current', async () => {
     { resolve, checkAvailable },
   )
 
-  assertEquals(results.map((r) => ({ name: r.name, status: r.status })), [
-    { name: 'caddy', status: 'outdated' },
-    { name: 'duckdb', status: 'current' },
-  ])
+  assertEquals(
+    results.map((r) => ({ name: r.name, status: r.status })),
+    [
+      { name: 'caddy', status: 'outdated' },
+      { name: 'duckdb', status: 'current' },
+    ],
+  )
   assertEquals(results[0].available, '2.9.0')
   assertEquals(results[0].resolved?.name, 'caddy')
 })
 
-Deno.test('checkPackageUpdates skips packages not in catalog', async () => {
+test('checkPackageUpdates skips packages not in catalog', async () => {
   const resolve: ResolvePackageFn = (name) =>
     Promise.reject(new Error(`Unknown package '${name}'`))
   const checkAvailable: CheckAvailableFn = () => Promise.resolve('1.0.0')
@@ -63,7 +67,7 @@ Deno.test('checkPackageUpdates skips packages not in catalog', async () => {
   assertEquals(results[0].reason?.includes('Unknown package'), true)
 })
 
-Deno.test('checkPackageUpdates reports provider errors', async () => {
+test('checkPackageUpdates reports provider errors', async () => {
   const resolve: ResolvePackageFn = (name) =>
     Promise.resolve(fakeResolved(name))
   const checkAvailable: CheckAvailableFn = () =>
@@ -78,7 +82,7 @@ Deno.test('checkPackageUpdates reports provider errors', async () => {
   assertEquals(results[0].reason, 'rate limited')
 })
 
-Deno.test('checkPackageUpdates filters by names and rejects missing', async () => {
+test('checkPackageUpdates filters by names and rejects missing', async () => {
   const resolve: ResolvePackageFn = (name) =>
     Promise.resolve(fakeResolved(name))
   const checkAvailable: CheckAvailableFn = () => Promise.resolve('2.0.0')
@@ -95,10 +99,11 @@ Deno.test('checkPackageUpdates filters by names and rejects missing', async () =
 
   await assertRejects(
     () =>
-      checkPackageUpdates(
-        [{ name: 'caddy', version: '1.0.0' }],
-        { names: ['missing'], resolve, checkAvailable },
-      ),
+      checkPackageUpdates([{ name: 'caddy', version: '1.0.0' }], {
+        names: ['missing'],
+        resolve,
+        checkAvailable,
+      }),
     Error,
     'Not installed: missing',
   )

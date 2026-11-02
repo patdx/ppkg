@@ -15,7 +15,7 @@ Commands:
   repo remove <url>   Remove a remote repo
   repo update         Refresh cached repo/package JSON
   self-install        Install this CLI globally as ppkg
-  self-update         Reinstall latest @patdx/pkg as ppkg
+  self-update         Reinstall latest @patdx/ppkg as ppkg
 
 Options:
   --url <url>         URL to download the binary from (can also be provided as first argument)

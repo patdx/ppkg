@@ -1,15 +1,16 @@
-import { copy, exists, move } from '@std/fs'
-import { dirname, join, resolve } from '@std/path'
-import { homedir as getHomeDir } from 'node:os'
+import { mkdtempSync, rmSync, createWriteStream } from 'node:fs'
+import { readdir, readlink, rename, rm, writeFile } from 'node:fs/promises'
+import { copy, exists, move } from './fs-utils.ts'
+import { dirname, join, resolve } from 'node:path'
+import { randomUUID } from 'node:crypto'
+import { Readable } from 'node:stream'
+import { pipeline } from 'node:stream/promises'
+import { spawn } from 'node:child_process'
+import { homedir as getHomeDir, tmpdir } from 'node:os'
 
 export const PKG_HOME = resolve(getHomeDir(), '.ppkg')
 export const LOCAL_BIN_DIR = join(getHomeDir() || '', '.local', 'bin')
-export const DESKTOP_DIR = join(
-  getHomeDir(),
-  '.local',
-  'share',
-  'applications',
-)
+export const DESKTOP_DIR = join(getHomeDir(), '.local', 'share', 'applications')
 
 const MANAGED_PACKAGE_NAME = /^[A-Za-z0-9._-]+$/
 
@@ -24,9 +25,9 @@ export function assertManagedPackageName(name: string): string {
 }
 
 export async function ensureBinInPath() {
-  const path = Deno.env.get('PATH') || ''
+  const path = process.env['PATH'] || ''
   if (!path.includes(LOCAL_BIN_DIR)) {
-    const shell = Deno.env.get('SHELL') || ''
+    const shell = process.env['SHELL'] || ''
     const isZsh = shell.includes('zsh')
     const shellRcFile = isZsh
       ? join(getHomeDir() || '', '.zshrc')
@@ -34,11 +35,9 @@ export async function ensureBinInPath() {
 
     console.log(`Detected shell: ${isZsh ? 'zsh' : 'bash'}`)
 
-    await Deno.writeTextFile(
-      shellRcFile,
-      `\nexport PATH="$PATH:${LOCAL_BIN_DIR}"\n`,
-      { append: true },
-    )
+    await writeFile(shellRcFile, `\nexport PATH="$PATH:${LOCAL_BIN_DIR}"\n`, {
+      flag: 'a',
+    })
 
     console.log(`Added ${LOCAL_BIN_DIR} to PATH in ${shellRcFile}`)
     console.log(
@@ -59,16 +58,18 @@ export async function downloadToFile(url: string, filePath: string) {
     throw new Error(`Download returned no response body: ${url}`)
   }
 
-  const temporaryPath = await Deno.makeTempFile({
-    dir: dirname(filePath),
-    prefix: '.ppkg-download-',
-  })
+  const temporaryPath = join(
+    dirname(filePath),
+    `.ppkg-download-${randomUUID()}`,
+  )
   try {
-    const file = await Deno.open(temporaryPath, { write: true })
-    await response.body.pipeTo(file.writable)
-    await Deno.rename(temporaryPath, filePath)
+    await pipeline(
+      Readable.fromWeb(response.body),
+      createWriteStream(temporaryPath, { flags: 'wx', mode: 0o600 }),
+    )
+    await rename(temporaryPath, filePath)
   } catch (error) {
-    await Deno.remove(temporaryPath).catch(() => {})
+    await rm(temporaryPath).catch(() => {})
     throw error
   }
 
@@ -76,22 +77,17 @@ export async function downloadToFile(url: string, filePath: string) {
 }
 
 async function runArchiveCommand(tool: string, args: string[]): Promise<void> {
-  const command = new Deno.Command(tool, { args })
-  const { success, stdout, stderr, signal } = await command.output()
-
-  if (!success) {
-    console.log(stdout)
-    console.log(stderr)
-    console.error(`Command failed: ${command.toString()}`)
-    console.error(`Signal: ${signal}`)
-    Deno.exit(1)
-  }
+  const child = spawn(tool, args, { stdio: ['ignore', 'ignore', 'inherit'] })
+  await new Promise<void>((resolve, reject) => {
+    child.once('error', reject)
+    child.once('exit', (code, signal) => {
+      if (code === 0) resolve()
+      else reject(new Error(`${tool} failed (${signal ?? code})`))
+    })
+  })
 }
 
-export async function extractZip(
-  zipPath: string,
-  dir: string,
-): Promise<void> {
+export async function extractZip(zipPath: string, dir: string): Promise<void> {
   await runArchiveCommand('unzip', ['-o', zipPath, '-d', dir])
 }
 
@@ -110,12 +106,12 @@ export async function extractTarGz(
 }
 export async function getProcessingDir(extractedDir: string): Promise<string> {
   const entries = []
-  for await (const entry of Deno.readDir(extractedDir)) {
+  for (const entry of await readdir(extractedDir, { withFileTypes: true })) {
     entries.push(entry)
   }
 
   // If there's only one directory, return its path
-  if (entries.length === 1 && entries[0].isDirectory) {
+  if (entries.length === 1 && entries[0].isDirectory()) {
     return join(extractedDir, entries[0].name)
   }
 
@@ -127,12 +123,12 @@ export class TempDir implements Disposable {
   path: string
 
   constructor() {
-    this.path = Deno.makeTempDirSync()
+    this.path = mkdtempSync(join(tmpdir(), 'ppkg-'))
   }
 
   [Symbol.dispose]() {
     console.log(`Removing temporary path ${this.path}`)
-    Deno.removeSync(this.path, { recursive: true })
+    rmSync(this.path, { recursive: true })
   }
 }
 
@@ -162,7 +158,7 @@ async function copyAndDelete(
   await copy(from, to, {
     overwrite: options?.overwrite,
   })
-  await Deno.remove(from, {
+  await rm(from, {
     recursive: true,
   })
 }
@@ -175,11 +171,11 @@ export async function listInstalledPackages() {
   }> = []
 
   try {
-    for await (const entry of Deno.readDir(LOCAL_BIN_DIR)) {
-      if (!entry.isSymlink) continue
+    for (const entry of await readdir(LOCAL_BIN_DIR, { withFileTypes: true })) {
+      if (!entry.isSymbolicLink()) continue
 
       const linkPath = join(LOCAL_BIN_DIR, entry.name)
-      const realPath = await Deno.readLink(linkPath)
+      const realPath = await readlink(linkPath)
 
       // Check if it points to our PKG_HOME
       if (!realPath.includes(PKG_HOME)) continue
@@ -189,7 +185,7 @@ export async function listInstalledPackages() {
       const currentPath = join(pkgPath, 'current')
       let version = 'unknown'
       try {
-        const versionPath = await Deno.readLink(currentPath)
+        const versionPath = await readlink(currentPath)
         version = versionPath.split('/').pop() || 'unknown'
       } catch {
         // Ignore errors reading version
@@ -202,6 +198,7 @@ export async function listInstalledPackages() {
       })
     }
   } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
     console.error('Error reading installed packages:', error)
     return []
   }
@@ -218,7 +215,7 @@ export async function removePackage(
     const pkgPath = join(PKG_HOME, packageName)
 
     // Check if package exists
-    if (!await exists(localBinPath) && !await exists(pkgPath)) {
+    if (!(await exists(localBinPath)) && !(await exists(pkgPath))) {
       return {
         success: false,
         error: `Package '${packageName}' is not installed`,
@@ -227,12 +224,12 @@ export async function removePackage(
 
     // Remove symlink from .local/bin if it exists
     if (await exists(localBinPath)) {
-      await Deno.remove(localBinPath)
+      await rm(localBinPath)
     }
 
     // Remove package directory from ~/.ppkg if it exists
     if (await exists(pkgPath)) {
-      await Deno.remove(pkgPath, { recursive: true })
+      await rm(pkgPath, { recursive: true })
     }
 
     return { success: true }

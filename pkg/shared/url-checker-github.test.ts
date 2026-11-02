@@ -1,4 +1,5 @@
-import { assert, assertEquals } from '@std/assert'
+import { test } from 'node:test'
+import { assert, assertEquals } from './test-assert.ts'
 import {
   analyzeAssets,
   findViableAsset,
@@ -69,130 +70,154 @@ const duckdbAssets: GithubRelease['assets'] = [
   },
 ]
 
-Deno.test('analyzeAssets - Linux AMD64', () => {
+test('analyzeAssets - Linux AMD64', () => {
   const context = { platform: 'linux', arch: 'x64' }
   const analysis = analyzeAssets(duckdbAssets, context)
 
   // Check duckdb_cli-linux-amd64.zip analysis
   const cliAsset = analysis.find((a) => a.name === 'duckdb_cli-linux-amd64.zip')
-  assertEquals({
-    matchingPlatform: cliAsset?.analysis.matchingPlatform,
-    matchingArch: cliAsset?.analysis.matchingArch,
-    isBinary: cliAsset?.analysis.isBinary,
-  }, {
-    matchingPlatform: 'linux',
-    matchingArch: 'amd64',
-    isBinary: true,
-  })
+  assertEquals(
+    {
+      matchingPlatform: cliAsset?.analysis.matchingPlatform,
+      matchingArch: cliAsset?.analysis.matchingArch,
+      isBinary: cliAsset?.analysis.isBinary,
+    },
+    {
+      matchingPlatform: 'linux',
+      matchingArch: 'amd64',
+      isBinary: true,
+    },
+  )
 
   // Check libduckdb-linux-amd64.zip analysis
   const libAsset = analysis.find((a) => a.name === 'libduckdb-linux-amd64.zip')
-  assertEquals({
-    matchingPlatform: libAsset?.analysis.matchingPlatform,
-    matchingArch: libAsset?.analysis.matchingArch,
-    isBinary: libAsset?.analysis.isBinary,
-  }, {
-    matchingPlatform: 'linux',
-    matchingArch: 'amd64',
-    isBinary: true,
-  })
+  assertEquals(
+    {
+      matchingPlatform: libAsset?.analysis.matchingPlatform,
+      matchingArch: libAsset?.analysis.matchingArch,
+      isBinary: libAsset?.analysis.isBinary,
+    },
+    {
+      matchingPlatform: 'linux',
+      matchingArch: 'amd64',
+      isBinary: true,
+    },
+  )
 })
 
-Deno.test('analyzeAssets - Darwin ARM64', () => {
+test('analyzeAssets - Darwin ARM64', () => {
   const context = { platform: 'darwin', arch: 'arm64' }
   const analysis = analyzeAssets(duckdbAssets, context)
 
   // Check duckdb_cli-osx-universal.zip analysis
-  const cliAsset = analysis.find((a) =>
-    a.name === 'duckdb_cli-osx-universal.zip'
+  const cliAsset = analysis.find(
+    (a) => a.name === 'duckdb_cli-osx-universal.zip',
   )
-  assertEquals({
-    matchingPlatform: cliAsset?.analysis.matchingPlatform,
-    matchingArch: cliAsset?.analysis.matchingArch,
-    isBinary: cliAsset?.analysis.isBinary,
-  }, {
-    matchingPlatform: 'osx',
-    matchingArch: 'universal',
-    isBinary: true,
-  })
+  assertEquals(
+    {
+      matchingPlatform: cliAsset?.analysis.matchingPlatform,
+      matchingArch: cliAsset?.analysis.matchingArch,
+      isBinary: cliAsset?.analysis.isBinary,
+    },
+    {
+      matchingPlatform: 'osx',
+      matchingArch: 'universal',
+      isBinary: true,
+    },
+  )
 
   // Check libduckdb-osx-universal.zip analysis
-  const libAsset = analysis.find((a) =>
-    a.name === 'libduckdb-osx-universal.zip'
+  const libAsset = analysis.find(
+    (a) => a.name === 'libduckdb-osx-universal.zip',
   )
-  assertEquals({
-    matchingPlatform: libAsset?.analysis.matchingPlatform,
-    matchingArch: libAsset?.analysis.matchingArch,
-    isBinary: libAsset?.analysis.isBinary,
-  }, {
-    matchingPlatform: 'osx',
-    matchingArch: 'universal',
-    isBinary: true,
-  })
+  assertEquals(
+    {
+      matchingPlatform: libAsset?.analysis.matchingPlatform,
+      matchingArch: libAsset?.analysis.matchingArch,
+      isBinary: libAsset?.analysis.isBinary,
+    },
+    {
+      matchingPlatform: 'osx',
+      matchingArch: 'universal',
+      isBinary: true,
+    },
+  )
 })
 
-Deno.test('analyzeAssets - Windows ARM64', () => {
+test('analyzeAssets - Windows ARM64', () => {
   const context = { platform: 'win32', arch: 'arm64' }
   const analysis = analyzeAssets(duckdbAssets, context)
 
   // Check duckdb_cli-windows-arm64.zip analysis
-  const cliAsset = analysis.find((a) =>
-    a.name === 'duckdb_cli-windows-arm64.zip'
+  const cliAsset = analysis.find(
+    (a) => a.name === 'duckdb_cli-windows-arm64.zip',
   )
-  assertEquals({
-    matchingPlatform: cliAsset?.analysis.matchingPlatform,
-    matchingArch: cliAsset?.analysis.matchingArch,
-    isBinary: cliAsset?.analysis.isBinary,
-  }, {
-    matchingPlatform: 'windows',
-    matchingArch: 'arm64',
-    isBinary: true,
-  })
+  assertEquals(
+    {
+      matchingPlatform: cliAsset?.analysis.matchingPlatform,
+      matchingArch: cliAsset?.analysis.matchingArch,
+      isBinary: cliAsset?.analysis.isBinary,
+    },
+    {
+      matchingPlatform: 'windows',
+      matchingArch: 'arm64',
+      isBinary: true,
+    },
+  )
 
   // Check libduckdb-windows-arm64.zip analysis
-  const libAsset = analysis.find((a) =>
-    a.name === 'libduckdb-windows-arm64.zip'
+  const libAsset = analysis.find(
+    (a) => a.name === 'libduckdb-windows-arm64.zip',
   )
-  assertEquals({
-    matchingPlatform: libAsset?.analysis.matchingPlatform,
-    matchingArch: libAsset?.analysis.matchingArch,
-    isBinary: libAsset?.analysis.isBinary,
-  }, {
-    matchingPlatform: 'windows',
-    matchingArch: 'arm64',
-    isBinary: true,
-  })
+  assertEquals(
+    {
+      matchingPlatform: libAsset?.analysis.matchingPlatform,
+      matchingArch: libAsset?.analysis.matchingArch,
+      isBinary: libAsset?.analysis.isBinary,
+    },
+    {
+      matchingPlatform: 'windows',
+      matchingArch: 'arm64',
+      isBinary: true,
+    },
+  )
 })
 
-Deno.test('analyzeAssets - Source packages', () => {
+test('analyzeAssets - Source packages', () => {
   const context = { platform: 'linux', arch: 'x64' }
   const analysis = analyzeAssets(duckdbAssets, context)
 
   // Check source packages are marked as binaries but don't match platform/arch
   const pythonSrc = analysis.find((a) => a.name === 'duckdb_python_src.tar.gz')
-  assertEquals({
-    matchingPlatform: pythonSrc?.analysis.matchingPlatform,
-    matchingArch: pythonSrc?.analysis.matchingArch,
-    isBinary: pythonSrc?.analysis.isBinary,
-  }, {
-    matchingPlatform: undefined,
-    matchingArch: undefined,
-    isBinary: true,
-  })
+  assertEquals(
+    {
+      matchingPlatform: pythonSrc?.analysis.matchingPlatform,
+      matchingArch: pythonSrc?.analysis.matchingArch,
+      isBinary: pythonSrc?.analysis.isBinary,
+    },
+    {
+      matchingPlatform: undefined,
+      matchingArch: undefined,
+      isBinary: true,
+    },
+  )
 
   const libSrc = analysis.find((a) => a.name === 'libduckdb-src.zip')
-  assertEquals({
-    matchingPlatform: libSrc?.analysis.matchingPlatform,
-    matchingArch: libSrc?.analysis.matchingArch,
-    isBinary: libSrc?.analysis.isBinary,
-  }, {
-    matchingPlatform: undefined,
-    matchingArch: undefined,
-    isBinary: true,
-  })
+  assertEquals(
+    {
+      matchingPlatform: libSrc?.analysis.matchingPlatform,
+      matchingArch: libSrc?.analysis.matchingArch,
+      isBinary: libSrc?.analysis.isBinary,
+    },
+    {
+      matchingPlatform: undefined,
+      matchingArch: undefined,
+      isBinary: true,
+    },
+  )
 })
 
-Deno.test('analyzeAssets - Scoring heuristics', () => {
+test('analyzeAssets - Scoring heuristics', () => {
   const context = { platform: 'linux', arch: 'x64' }
   const analysis = analyzeAssets(duckdbAssets, context)
 
@@ -217,7 +242,7 @@ Deno.test('analyzeAssets - Scoring heuristics', () => {
   assertEquals(cliAsset.analysis.score > libAsset.analysis.score, true)
 })
 
-Deno.test('analyzeAssets - Additional scoring patterns', () => {
+test('analyzeAssets - Additional scoring patterns', () => {
   const testAssets: GithubRelease['assets'] = [
     {
       name: 'app-bin-linux-amd64.zip',
@@ -268,7 +293,7 @@ Deno.test('analyzeAssets - Additional scoring patterns', () => {
   )
 })
 
-Deno.test('findViableAsset - Multiple viable assets', () => {
+test('findViableAsset - Multiple viable assets', () => {
   const testAssets: GithubRelease['assets'] = [
     {
       name: 'app-cli-linux-amd64.zip',
@@ -324,7 +349,7 @@ Deno.test('findViableAsset - Multiple viable assets', () => {
   }
 })
 
-Deno.test('getPlatformIdentifiers - Linux x64', () => {
+test('getPlatformIdentifiers - Linux x64', () => {
   const context = { platform: 'linux', arch: 'x64' }
   const { platforms, archs } = getPlatformIdentifiers(context)
 
@@ -354,7 +379,7 @@ const codexbarAssets: GithubRelease['assets'] = [
   },
 ]
 
-Deno.test('findViableAsset - CodexBar CLI prefers glibc on gnu hosts', () => {
+test('findViableAsset - CodexBar CLI prefers glibc on gnu hosts', () => {
   const context = { platform: 'linux', arch: 'x64', libc: 'gnu' as const }
   const originalWarn = console.warn
   console.warn = () => {}
@@ -370,7 +395,7 @@ Deno.test('findViableAsset - CodexBar CLI prefers glibc on gnu hosts', () => {
   }
 })
 
-Deno.test('findViableAsset - CodexBar CLI prefers musl on musl hosts', () => {
+test('findViableAsset - CodexBar CLI prefers musl on musl hosts', () => {
   const context = { platform: 'linux', arch: 'x64', libc: 'musl' as const }
   const originalWarn = console.warn
   console.warn = () => {}
@@ -380,10 +405,7 @@ Deno.test('findViableAsset - CodexBar CLI prefers musl on musl hosts', () => {
       analyzeAssets(codexbarAssets, context),
       context,
     )
-    assertEquals(
-      asset?.name,
-      'CodexBarCLI-v0.45.2-linux-musl-x86_64.tar.gz',
-    )
+    assertEquals(asset?.name, 'CodexBarCLI-v0.45.2-linux-musl-x86_64.tar.gz')
   } finally {
     console.warn = originalWarn
   }

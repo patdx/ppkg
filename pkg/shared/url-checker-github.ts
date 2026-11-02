@@ -33,8 +33,10 @@ const NON_BINARY_EXTENSIONS = ['.symbols.tar.gz', '-symbols.tar.gz']
 
 function couldBeBinary(url: string): boolean {
   url = url.toLowerCase()
-  return BINARY_EXTENSIONS.some((ext) => url.endsWith(ext)) &&
+  return (
+    BINARY_EXTENSIONS.some((ext) => url.endsWith(ext)) &&
     NON_BINARY_EXTENSIONS.every((ext) => !url.endsWith(ext))
+  )
 }
 
 export type LinuxLibc = 'musl' | 'gnu'
@@ -109,7 +111,7 @@ export async function fetchGithubRelease(
 
   if (!response.ok) return null
 
-  const release: GithubRelease = await response.json()
+  const release = (await response.json()) as GithubRelease
   return release.assets.length > 0 ? release : null
 }
 
@@ -123,7 +125,7 @@ export function analyzeAssets(
   const analyzed = assets.map((asset) => {
     const name = asset.name.toLowerCase()
     const matchingPlatform = platforms.find((platform) =>
-      name.includes(platform.toLowerCase())
+      name.includes(platform.toLowerCase()),
     )
     const matchingArch = archs.find((arch) => name.includes(arch.toLowerCase()))
     const isBinary = couldBeBinary(name)
@@ -134,9 +136,8 @@ export function analyzeAssets(
 
     // Positive patterns
     if (name.includes('cli')) score += 2
-    if (
-      name.includes('bin') || name.includes('exe') || name.includes('binary')
-    ) score += 1
+    if (name.includes('bin') || name.includes('exe') || name.includes('binary'))
+      score += 1
 
     // Negative patterns
     if (name.includes('lib')) score -= 1
@@ -144,7 +145,9 @@ export function analyzeAssets(
     if (name.includes('debug') || name.includes('dbg')) score -= 2
     if (name.includes('dev') || name.includes('devel')) score -= 2
     if (
-      name.includes('symbols') || name.includes('pdb') || name.includes('dsym')
+      name.includes('symbols') ||
+      name.includes('pdb') ||
+      name.includes('dsym')
     ) {
       score -= 2
     }
@@ -191,7 +194,7 @@ export function generateErrorDetails(
         `  - Matches architecture: ${asset.analysis.matchingArch || 'no'}`,
         `  - Is binary: ${asset.analysis.isBinary ? 'yes' : 'no'}`,
         `  - Score: ${asset.analysis.score}`,
-      ].join('\n')
+      ].join('\n'),
     ),
   ].join('\n')
 }
@@ -200,10 +203,11 @@ export function findViableAsset(
   assetAnalysis: AssetAnalysis[],
   context: CheckerContext,
 ): AssetAnalysis | null {
-  const viableAssets = assetAnalysis.filter((asset) =>
-    asset.analysis.matchingPlatform &&
-    asset.analysis.matchingArch &&
-    asset.analysis.isBinary
+  const viableAssets = assetAnalysis.filter(
+    (asset) =>
+      asset.analysis.matchingPlatform &&
+      asset.analysis.matchingArch &&
+      asset.analysis.isBinary,
   )
 
   if (viableAssets.length > 1) {
@@ -236,7 +240,8 @@ async function checkGithubUrl(
 
   if (!viableAsset) {
     throw new Error(
-      `Could not find a matching release asset for your system:` + '\n' +
+      `Could not find a matching release asset for your system:` +
+        '\n' +
         generateErrorDetails(assetAnalysis, context),
     )
   }

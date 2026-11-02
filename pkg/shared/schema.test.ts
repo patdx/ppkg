@@ -1,4 +1,5 @@
-import { assertEquals, assertThrows } from '@std/assert'
+import { test } from 'node:test'
+import { assertEquals, assertThrows } from './test-assert.ts'
 import {
   assertSupportedDocumentVersion,
   installOptionsFromDocument,
@@ -6,16 +7,18 @@ import {
   parseRepoListing,
 } from './schema.ts'
 
-Deno.test('parsePackageDocument accepts snake_case catalog entries', () => {
+test('parsePackageDocument accepts snake_case catalog entries', () => {
   const doc = parsePackageDocument({
     $schema: 'https://repo.pmil.me/package.schema.json',
     version: 1,
     name: 'codexbar',
     binary_name: 'codexbar',
-    files: [{
-      url: 'https://github.com/steipete/CodexBar',
-      url_provider: 'github',
-    }],
+    files: [
+      {
+        url: 'https://github.com/steipete/CodexBar',
+        url_provider: 'github',
+      },
+    ],
   })
 
   assertEquals(doc.name, 'codexbar')
@@ -23,7 +26,7 @@ Deno.test('parsePackageDocument accepts snake_case catalog entries', () => {
   assertEquals(installOptionsFromDocument(doc).binary_name, 'codexbar')
 })
 
-Deno.test('parseRepoListing accepts packages + min_cli_version', () => {
+test('parseRepoListing accepts packages + min_cli_version', () => {
   const listing = parseRepoListing({
     version: 1,
     packages: ['caddy', 'duckdb'],
@@ -32,7 +35,7 @@ Deno.test('parseRepoListing accepts packages + min_cli_version', () => {
   assertEquals(listing.packages, ['caddy', 'duckdb'])
 })
 
-Deno.test('assertSupportedDocumentVersion rejects future versions', () => {
+test('assertSupportedDocumentVersion rejects future versions', () => {
   assertThrows(
     () => assertSupportedDocumentVersion({ version: 99 }, 'package'),
     Error,

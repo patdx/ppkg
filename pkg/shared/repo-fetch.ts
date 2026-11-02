@@ -1,8 +1,9 @@
+import { readFile, stat, writeFile } from 'node:fs/promises'
 /**
  * Catalog document fetching with caching for @patdx/pkg.
  */
-import { ensureDir } from '@std/fs'
-import { dirname, join } from '@std/path'
+import { ensureDir } from './fs-utils.ts'
+import { dirname, join } from 'node:path'
 import { createHash } from 'node:crypto'
 import { PKG_HOME } from './fs.ts'
 import { normalizeRepoBase } from './repo-config.ts'
@@ -25,11 +26,13 @@ export function isHttpBase(base: string): boolean {
 }
 
 export function isLocalBase(base: string): boolean {
-  return base.startsWith('file:') ||
+  return (
+    base.startsWith('file:') ||
     base.startsWith('/') ||
     base.startsWith('./') ||
     base.startsWith('../') ||
     /^[A-Za-z]:[\\/]/.test(base)
+  )
 }
 
 export function localBaseToPath(base: string): string {
@@ -54,7 +57,7 @@ interface CacheMeta {
 
 async function writeCacheMeta(dir: string, meta: CacheMeta): Promise<void> {
   await ensureDir(dir)
-  await Deno.writeTextFile(join(dir, 'meta.json'), `${JSON.stringify(meta)}\n`)
+  await writeFile(join(dir, 'meta.json'), `${JSON.stringify(meta)}\n`)
 }
 
 /** Catalog JSON lives at the repo base (static files, no `/api` prefix). */
@@ -73,7 +76,7 @@ async function fetchText(url: string): Promise<string> {
     }
     return await response.text()
   }
-  return await Deno.readTextFile(url)
+  return await readFile(url, 'utf8')
 }
 
 async function readCachedText(
@@ -81,10 +84,10 @@ async function readCachedText(
   maxAgeMs: number,
 ): Promise<string | null> {
   try {
-    const stat = await Deno.stat(path)
-    const age = Date.now() - (stat.mtime?.getTime() ?? 0)
+    const info = await stat(path)
+    const age = Date.now() - (info.mtime?.getTime() ?? 0)
     if (age > maxAgeMs) return null
-    return await Deno.readTextFile(path)
+    return await readFile(path, 'utf8')
   } catch {
     return null
   }
@@ -114,7 +117,7 @@ async function fetchCatalogDocument<T>(
 
   if (isHttpBase(normalized)) {
     await ensureDir(dirname(cachePath))
-    await Deno.writeTextFile(cachePath, text)
+    await writeFile(cachePath, text)
     await writeCacheMeta(cacheDir, {
       fetched_at: Date.now(),
       base: normalized,

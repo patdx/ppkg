@@ -1,74 +1,79 @@
-import { assertEquals } from '@std/assert'
-import { join } from '@std/path'
+import { mkdtemp } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join as joinTempPath } from 'node:path'
+import { readFile, rm } from 'node:fs/promises'
+import { test } from 'node:test'
+import { assertEquals } from './test-assert.ts'
+import { join } from 'node:path'
 import {
   formatUpdateNotice,
-  type JsrPackageMeta,
+  type NpmPackageMeta,
   maybeNotifyPkgUpdate,
   pickLatestVersion,
   shouldNotifyUpdate,
-} from './jsr-update-check.ts'
+} from './npm-update-check.ts'
 
-Deno.test('pickLatestVersion prefers meta.latest when not yanked', () => {
-  const meta: JsrPackageMeta = {
-    latest: '0.7.0',
+test('pickLatestVersion prefers the latest dist-tag when not deprecated', () => {
+  const meta: NpmPackageMeta = {
+    'dist-tags': { latest: '0.7.0' },
     versions: {
       '0.6.0': {},
       '0.7.0': {},
-      '0.8.0': { yanked: true },
+      '0.8.0': { deprecated: 'withdrawn' },
     },
   }
   assertEquals(pickLatestVersion(meta), '0.7.0')
 })
 
-Deno.test('pickLatestVersion skips yanked latest and picks max non-yanked', () => {
-  const meta: JsrPackageMeta = {
-    latest: '0.8.0',
+test('pickLatestVersion skips deprecated latest and picks max non-deprecated', () => {
+  const meta: NpmPackageMeta = {
+    'dist-tags': { latest: '0.8.0' },
     versions: {
       '0.6.0': {},
       '0.7.0': {},
-      '0.8.0': { yanked: true },
+      '0.8.0': { deprecated: 'withdrawn' },
     },
   }
   assertEquals(pickLatestVersion(meta), '0.7.0')
 })
 
-Deno.test('pickLatestVersion returns null when all yanked or empty', () => {
+test('pickLatestVersion returns null when all deprecated or empty', () => {
   assertEquals(
-    pickLatestVersion({ versions: { '1.0.0': { yanked: true } } }),
+    pickLatestVersion({ versions: { '1.0.0': { deprecated: 'withdrawn' } } }),
     null,
   )
   assertEquals(pickLatestVersion({}), null)
 })
 
-Deno.test('shouldNotifyUpdate compares dotted semver', () => {
+test('shouldNotifyUpdate compares dotted semver', () => {
   assertEquals(shouldNotifyUpdate('0.7.0', '0.8.0'), true)
   assertEquals(shouldNotifyUpdate('0.7.0', '0.7.0'), false)
   assertEquals(shouldNotifyUpdate('0.8.0', '0.7.0'), false)
   assertEquals(shouldNotifyUpdate('0.7.0', '0.7.1'), true)
 })
 
-Deno.test('formatUpdateNotice brands ppkg self-update', () => {
+test('formatUpdateNotice brands ppkg self-update', () => {
   const notice = formatUpdateNotice('0.7.0', '0.8.0')
   assertEquals(
-    notice.includes('Update available: @patdx/pkg 0.7.0 → 0.8.0'),
+    notice.includes('Update available: @patdx/ppkg 0.7.0 → 0.8.0'),
     true,
   )
   assertEquals(notice.includes('ppkg self-update'), true)
-  assertEquals(
-    notice.includes('deno install -g -A -f -n ppkg jsr:@patdx/pkg'),
-    true,
-  )
+  assertEquals(notice.includes('npm install -g @patdx/ppkg@latest'), true)
 })
 
-Deno.test('maybeNotifyPkgUpdate skips when env opt-out is set', async () => {
+test('maybeNotifyPkgUpdate skips when env opt-out is set', async () => {
   let fetched = false
   let notices = 0
   await maybeNotifyPkgUpdate({
-    env: { get: (key) => key === 'PPKG_NO_UPDATE_CHECK' ? '1' : undefined },
+    env: { get: (key) => (key === 'PPKG_NO_UPDATE_CHECK' ? '1' : undefined) },
     isTerminal: () => true,
     fetchMeta: () => {
       fetched = true
-      return Promise.resolve({ latest: '9.0.0', versions: { '9.0.0': {} } })
+      return Promise.resolve({
+        'dist-tags': { latest: '9.0.0' },
+        versions: { '9.0.0': {} },
+      })
     },
     writeNotice: () => {
       notices++
@@ -78,22 +83,25 @@ Deno.test('maybeNotifyPkgUpdate skips when env opt-out is set', async () => {
   assertEquals(notices, 0)
 })
 
-Deno.test('maybeNotifyPkgUpdate skips when stderr is not a TTY', async () => {
+test('maybeNotifyPkgUpdate skips when stderr is not a TTY', async () => {
   let fetched = false
   await maybeNotifyPkgUpdate({
     env: { get: () => undefined },
     isTerminal: () => false,
     fetchMeta: () => {
       fetched = true
-      return Promise.resolve({ latest: '9.0.0', versions: { '9.0.0': {} } })
+      return Promise.resolve({
+        'dist-tags': { latest: '9.0.0' },
+        versions: { '9.0.0': {} },
+      })
     },
     writeNotice: () => {},
   })
   assertEquals(fetched, false)
 })
 
-Deno.test('maybeNotifyPkgUpdate notifies when behind and writes cache', async () => {
-  const tempDir = await Deno.makeTempDir({ prefix: 'pkg-update-check-' })
+test('maybeNotifyPkgUpdate notifies when behind and writes cache', async () => {
+  const tempDir = await mkdtemp(joinTempPath(tmpdir(), 'pkg-update-check-'))
   const cachePath = join(tempDir, 'pkg-update-check.json')
   const notices: string[] = []
 
@@ -107,7 +115,7 @@ Deno.test('maybeNotifyPkgUpdate notifies when behind and writes cache', async ()
       isTerminal: () => true,
       fetchMeta: () =>
         Promise.resolve({
-          latest: '0.8.0',
+          'dist-tags': { latest: '0.8.0' },
           versions: { '0.7.0': {}, '0.8.0': {} },
         }),
       writeNotice: (message) => notices.push(message),
@@ -116,7 +124,7 @@ Deno.test('maybeNotifyPkgUpdate notifies when behind and writes cache', async ()
     assertEquals(notices.length, 1)
     assertEquals(notices[0].includes('0.7.0 → 0.8.0'), true)
 
-    const cache = JSON.parse(await Deno.readTextFile(cachePath))
+    const cache = JSON.parse(await readFile(cachePath, 'utf8'))
     assertEquals(cache.checked_at, 1_000_000)
 
     // Within TTL: no second fetch / notice
@@ -130,19 +138,22 @@ Deno.test('maybeNotifyPkgUpdate notifies when behind and writes cache', async ()
       isTerminal: () => true,
       fetchMeta: () => {
         fetchedAgain = true
-        return Promise.resolve({ latest: '0.9.0', versions: { '0.9.0': {} } })
+        return Promise.resolve({
+          'dist-tags': { latest: '0.9.0' },
+          versions: { '0.9.0': {} },
+        })
       },
       writeNotice: (message) => notices.push(message),
     })
     assertEquals(fetchedAgain, false)
     assertEquals(notices.length, 1)
   } finally {
-    await Deno.remove(tempDir, { recursive: true })
+    await rm(tempDir, { recursive: true })
   }
 })
 
-Deno.test('maybeNotifyPkgUpdate stays quiet when already latest', async () => {
-  const tempDir = await Deno.makeTempDir({ prefix: 'pkg-update-check-' })
+test('maybeNotifyPkgUpdate stays quiet when already latest', async () => {
+  const tempDir = await mkdtemp(joinTempPath(tmpdir(), 'pkg-update-check-'))
   const cachePath = join(tempDir, 'pkg-update-check.json')
   let notices = 0
 
@@ -155,7 +166,7 @@ Deno.test('maybeNotifyPkgUpdate stays quiet when already latest', async () => {
       isTerminal: () => true,
       fetchMeta: () =>
         Promise.resolve({
-          latest: '0.8.0',
+          'dist-tags': { latest: '0.8.0' },
           versions: { '0.8.0': {} },
         }),
       writeNotice: () => {
@@ -164,12 +175,12 @@ Deno.test('maybeNotifyPkgUpdate stays quiet when already latest', async () => {
     })
     assertEquals(notices, 0)
   } finally {
-    await Deno.remove(tempDir, { recursive: true })
+    await rm(tempDir, { recursive: true })
   }
 })
 
-Deno.test('maybeNotifyPkgUpdate swallows fetch failures', async () => {
-  const tempDir = await Deno.makeTempDir({ prefix: 'pkg-update-check-' })
+test('maybeNotifyPkgUpdate swallows fetch failures', async () => {
+  const tempDir = await mkdtemp(joinTempPath(tmpdir(), 'pkg-update-check-'))
   const cachePath = join(tempDir, 'pkg-update-check.json')
   let notices = 0
 
@@ -187,6 +198,6 @@ Deno.test('maybeNotifyPkgUpdate swallows fetch failures', async () => {
     })
     assertEquals(notices, 0)
   } finally {
-    await Deno.remove(tempDir, { recursive: true })
+    await rm(tempDir, { recursive: true })
   }
 })

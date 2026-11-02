@@ -1,4 +1,11 @@
-import { assertEquals, assertRejects } from '@std/assert'
+import { ReadableStream } from 'node:stream/web'
+import { mkdtemp } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join as joinTempPath } from 'node:path'
+import { readdirSync } from 'node:fs'
+import { readFile, rm, writeFile } from 'node:fs/promises'
+import { test } from 'node:test'
+import { assertEquals, assertRejects } from './test-assert.ts'
 import { downloadToFile } from './fs.ts'
 
 async function withMockFetch(
@@ -6,38 +13,40 @@ async function withMockFetch(
   test: (directory: string) => Promise<void>,
 ): Promise<void> {
   const originalFetch = globalThis.fetch
-  const directory = await Deno.makeTempDir({ prefix: 'ppkg-download-test-' })
+  const directory = await mkdtemp(joinTempPath(tmpdir(), 'ppkg-download-test-'))
   globalThis.fetch = () => Promise.resolve(response)
 
   try {
     await test(directory)
   } finally {
     globalThis.fetch = originalFetch
-    await Deno.remove(directory, { recursive: true })
+    await rm(directory, { recursive: true })
   }
 }
 
-Deno.test('downloadToFile atomically replaces the destination on success', async () => {
+test('downloadToFile atomically replaces the destination on success', async () => {
   await withMockFetch(new Response('new contents'), async (directory) => {
     const destination = `${directory}/artifact`
-    await Deno.writeTextFile(destination, 'old contents')
+    await writeFile(destination, 'old contents')
 
     await downloadToFile('https://example.test/artifact', destination)
 
-    assertEquals(await Deno.readTextFile(destination), 'new contents')
+    assertEquals(await readFile(destination, 'utf8'), 'new contents')
     assertEquals(
-      [...Deno.readDirSync(directory)].map((entry) => entry.name),
+      [...readdirSync(directory, { withFileTypes: true })].map(
+        (entry) => entry.name,
+      ),
       ['artifact'],
     )
   })
 })
 
-Deno.test('downloadToFile rejects HTTP errors without changing the destination', async () => {
+test('downloadToFile rejects HTTP errors without changing the destination', async () => {
   await withMockFetch(
     new Response('not found', { status: 404, statusText: 'Not Found' }),
     async (directory) => {
       const destination = `${directory}/artifact`
-      await Deno.writeTextFile(destination, 'keep me')
+      await writeFile(destination, 'keep me')
 
       await assertRejects(
         () => downloadToFile('https://example.test/missing', destination),
@@ -45,12 +54,12 @@ Deno.test('downloadToFile rejects HTTP errors without changing the destination',
         'HTTP 404 Not Found',
       )
 
-      assertEquals(await Deno.readTextFile(destination), 'keep me')
+      assertEquals(await readFile(destination, 'utf8'), 'keep me')
     },
   )
 })
 
-Deno.test('downloadToFile rejects an empty response body', async () => {
+test('downloadToFile rejects an empty response body', async () => {
   await withMockFetch(new Response(null), async (directory) => {
     await assertRejects(
       () =>
@@ -58,5 +67,25 @@ Deno.test('downloadToFile rejects an empty response body', async () => {
       Error,
       'no response body',
     )
+  })
+})
+
+test('downloadToFile cleans up an interrupted stream and preserves the destination', async () => {
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode('partial'))
+      controller.error(new Error('connection interrupted'))
+    },
+  })
+  await withMockFetch(new Response(body), async (directory) => {
+    const destination = `${directory}/artifact`
+    await writeFile(destination, 'keep me')
+    await assertRejects(
+      () => downloadToFile('https://example.test/artifact', destination),
+      Error,
+      'connection interrupted',
+    )
+    assertEquals(await readFile(destination, 'utf8'), 'keep me')
+    assertEquals(readdirSync(directory), ['artifact'])
   })
 })

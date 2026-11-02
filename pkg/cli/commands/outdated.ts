@@ -16,7 +16,7 @@ export async function handleOutdatedCommand(): Promise<void> {
 
   const outdated = checks.filter((check) => check.status === 'outdated')
   if (outdated.length > 0) {
-    Deno.exit(1)
+    process.exit(1)
   }
 }
 
@@ -24,9 +24,7 @@ function printUpdateChecks(checks: PackageUpdateCheck[]): void {
   let shown = 0
   for (const check of checks) {
     if (check.status === 'outdated') {
-      console.log(
-        `  ${check.name}: ${check.installed} → ${check.available}`,
-      )
+      console.log(`  ${check.name}: ${check.installed} → ${check.available}`)
       shown++
     } else if (check.status === 'current') {
       console.log(`  ${check.name}: ${check.installed} (up to date)`)

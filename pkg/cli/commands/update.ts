@@ -19,7 +19,7 @@ export async function handleUpdateCommand(names: string[]): Promise<void> {
     })
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error))
-    Deno.exit(1)
+    process.exit(1)
   }
 
   for (const check of checks) {
@@ -37,8 +37,8 @@ export async function handleUpdateCommand(names: string[]): Promise<void> {
   const toUpdate = selectUpdateTargets(checks, names)
 
   if (toUpdate.length === 0) {
-    const hadCatalog = checks.some((check) =>
-      check.status === 'outdated' || check.status === 'current'
+    const hadCatalog = checks.some(
+      (check) => check.status === 'outdated' || check.status === 'current',
     )
     if (hadCatalog) {
       console.log('All catalog packages are up to date')
@@ -46,7 +46,7 @@ export async function handleUpdateCommand(names: string[]): Promise<void> {
       console.log('No catalog packages to update')
     }
     if (checks.some((check) => check.status === 'error')) {
-      Deno.exit(1)
+      process.exit(1)
     }
     return
   }
@@ -58,7 +58,7 @@ export async function handleUpdateCommand(names: string[]): Promise<void> {
   }
 
   if (failed > 0 || checks.some((check) => check.status === 'error')) {
-    Deno.exit(1)
+    process.exit(1)
   }
 }
 
@@ -67,8 +67,8 @@ function selectUpdateTargets(
   names: string[],
 ): PackageUpdateCheck[] {
   if (names.length > 0) {
-    return checks.filter((check) =>
-      check.status === 'outdated' || check.status === 'current'
+    return checks.filter(
+      (check) => check.status === 'outdated' || check.status === 'current',
     )
   }
   return checks.filter((check) => check.status === 'outdated')
@@ -83,9 +83,7 @@ async function applyUpdate(check: PackageUpdateCheck): Promise<boolean> {
     console.log(`  ${check.name}: ${check.installed} (up to date)`)
     return true
   }
-  console.log(
-    `Updating ${check.name}: ${check.installed} → ${check.available}`,
-  )
+  console.log(`Updating ${check.name}: ${check.installed} → ${check.available}`)
   try {
     await downloadAndInstall(check.resolved)
     return true

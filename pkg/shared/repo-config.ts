@@ -1,8 +1,10 @@
+import { readFile, writeFile } from 'node:fs/promises'
+import { PROJECT_ROOT } from './project.ts'
 /**
  * Config loading and repo source resolution for @patdx/pkg.
  */
-import { ensureDir, exists } from '@std/fs'
-import { dirname, fromFileUrl, join } from '@std/path'
+import { ensureDir, exists } from './fs-utils.ts'
+import { join } from 'node:path'
 import { PKG_HOME } from './fs.ts'
 import { DEFAULT_REMOTE_REPO } from './schema.ts'
 
@@ -31,28 +33,31 @@ function getDefaultConfig(): PkgConfig {
 }
 
 export async function loadConfig(): Promise<PkgConfig> {
-  const fromEnv = Deno.env.get('PPKG_REPOS')
+  const fromEnv = process.env['PPKG_REPOS']
   if (fromEnv?.trim()) {
     return {
-      repos: fromEnv.split(',').map((url) => ({ url: url.trim() })).filter((
-        entry,
-      ) => entry.url.length > 0),
+      repos: fromEnv
+        .split(',')
+        .map((url) => ({ url: url.trim() }))
+        .filter((entry) => entry.url.length > 0),
     }
   }
 
-  if (!await exists(CONFIG_PATH)) {
+  if (!(await exists(CONFIG_PATH))) {
     return getDefaultConfig()
   }
 
   try {
-    const raw = JSON.parse(await Deno.readTextFile(CONFIG_PATH))
+    const raw = JSON.parse(await readFile(CONFIG_PATH, 'utf8'))
     if (!raw || typeof raw !== 'object' || !Array.isArray(raw.repos)) {
       return getDefaultConfig()
     }
     const repos = raw.repos
-      .filter((entry: unknown): entry is RepoConfigEntry =>
-        !!entry && typeof entry === 'object' &&
-        typeof (entry as RepoConfigEntry).url === 'string'
+      .filter(
+        (entry: unknown): entry is RepoConfigEntry =>
+          !!entry &&
+          typeof entry === 'object' &&
+          typeof (entry as RepoConfigEntry).url === 'string',
       )
       .map((entry: RepoConfigEntry) => ({ url: entry.url }))
     return repos.length > 0 ? { repos } : getDefaultConfig()
@@ -63,10 +68,7 @@ export async function loadConfig(): Promise<PkgConfig> {
 
 export async function saveConfig(config: PkgConfig): Promise<void> {
   await ensureDir(PKG_HOME)
-  await Deno.writeTextFile(
-    CONFIG_PATH,
-    `${JSON.stringify(config, null, 2)}\n`,
-  )
+  await writeFile(CONFIG_PATH, `${JSON.stringify(config, null, 2)}\n`)
 }
 
 export function normalizeRepoBase(url: string): string {
@@ -74,14 +76,11 @@ export function normalizeRepoBase(url: string): string {
 }
 
 /**
- * Optional catalog shipped beside the CLI in this monorepo
- * (`pkg/shared` → `../../repo`). Absent after JSR install (https import.meta.url).
+ * Optional catalog bundled with the npm package or present in the checkout.
  */
 async function discoverBuiltinRepoBase(): Promise<string | null> {
-  // Deno.readDir / fromFileUrl only work for file: URLs; JSR serves https:.
-  if (!import.meta.url.startsWith('file:')) return null
-  const dir = join(dirname(fromFileUrl(import.meta.url)), '../../repo')
-  if (!await exists(join(dir, 'repo.json'))) return null
+  const dir = join(PROJECT_ROOT, 'repo')
+  if (!(await exists(join(dir, 'repo.json')))) return null
   return normalizeRepoBase(dir)
 }
 
@@ -93,8 +92,8 @@ async function discoverBuiltinRepoBase(): Promise<string | null> {
 export async function getRepoSources(
   config?: PkgConfig,
 ): Promise<RepoSource[]> {
-  const fromEnv = Boolean(Deno.env.get('PPKG_REPOS')?.trim())
-  const cfg = config ?? await loadConfig()
+  const fromEnv = Boolean(process.env['PPKG_REPOS']?.trim())
+  const cfg = config ?? (await loadConfig())
   const sources: RepoSource[] = []
   const seen = new Set<string>()
 

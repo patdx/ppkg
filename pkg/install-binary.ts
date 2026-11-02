@@ -1,11 +1,12 @@
+import { chmod, mkdir, readlink, rm, symlink } from 'node:fs/promises'
 import { extractTarXz } from './shared/fs.ts'
 /**
  * Install arbitrary zipped binaries on Linux
  * @module
  */
 
-import { ensureDir, exists } from '@std/fs'
-import { basename, isAbsolute, join } from '@std/path'
+import { ensureDir, exists } from './shared/fs-utils.ts'
+import { basename, isAbsolute, join } from 'node:path'
 import createDesktopShortcut from 'create-desktop-shortcuts'
 import {
   assertManagedPackageName,
@@ -49,17 +50,14 @@ async function downloadAndExtractFile(
 
     if (fileOptions.executable) {
       console.log(`Making ${targetPath} executable`)
-      await Deno.chmod(targetPath, 0o755)
+      await chmod(targetPath, 0o755)
     }
     return
   }
 
   using tempDir = new TempDir()
 
-  const resolvedFile = await checkUrl(
-    fileOptions.url,
-    fileOptions.url_provider,
-  )
+  const resolvedFile = await checkUrl(fileOptions.url, fileOptions.url_provider)
   const fileType = fileOptions.type ?? resolvedFile.type
   const downloadFilename = `download.${
     fileType === 'targz' ? 'tar.gz' : fileType === 'tarxz' ? 'tar.xz' : 'zip'
@@ -72,7 +70,7 @@ async function downloadAndExtractFile(
 
   const downloadPath = join(tempDir.path, downloadFilename)
   const extractDir = join(tempDir.path, 'extracted')
-  await Deno.mkdir(extractDir, { recursive: true })
+  await mkdir(extractDir, { recursive: true })
 
   if (fileType === 'tarxz') {
     await extractTarXz(downloadPath, extractDir)
@@ -95,9 +93,9 @@ async function linkCurrentVersion(
 ): Promise<string> {
   console.log(`Linking ${installCurrentDir} to ${installVersionDir}`)
   if (await exists(installCurrentDir)) {
-    await Deno.remove(installCurrentDir, { recursive: true })
+    await rm(installCurrentDir, { recursive: true })
   }
-  await Deno.symlink(installVersionDir, installCurrentDir)
+  await symlink(installVersionDir, installCurrentDir)
 
   await ensureDir(LOCAL_BIN_DIR)
   const localBinPath = join(LOCAL_BIN_DIR, binaryName)
@@ -105,11 +103,11 @@ async function linkCurrentVersion(
 
   console.log(`Linking ${localBinPath} to ${binaryPath}`)
   if (await exists(localBinPath)) {
-    await Deno.remove(localBinPath)
+    await rm(localBinPath)
   }
 
   if (await exists(binaryPath)) {
-    await Deno.symlink(binaryPath, localBinPath)
+    await symlink(binaryPath, localBinPath)
   }
 
   await ensureBinInPath()
@@ -125,9 +123,9 @@ function createShortcut(
   if (!shortcut) return
 
   const icon = shortcut.icon
-    ? (isAbsolute(shortcut.icon)
+    ? isAbsolute(shortcut.icon)
       ? shortcut.icon
-      : join(installVersionDir, shortcut.icon))
+      : join(installVersionDir, shortcut.icon)
     : undefined
 
   const success = createDesktopShortcut({
@@ -164,9 +162,8 @@ export async function downloadAndInstall(install: InstallOptions) {
   const binaryName = assertManagedPackageName(
     providedBinaryName ?? guessBinaryName(binaryUrl),
   )
-  const finalVersion = version === 'latest'
-    ? (detectedVersion ?? 'latest')
-    : version
+  const finalVersion =
+    version === 'latest' ? (detectedVersion ?? 'latest') : version
 
   const installDir = join(PKG_HOME, binaryName)
   const installVersionDir = join(installDir, finalVersion)
@@ -174,7 +171,7 @@ export async function downloadAndInstall(install: InstallOptions) {
 
   if (await exists(installCurrentDir)) {
     try {
-      const currentTarget = await Deno.readLink(installCurrentDir)
+      const currentTarget = await readlink(installCurrentDir)
       const currentVersion = currentTarget.split('/').pop()
       if (currentVersion === finalVersion) {
         console.log(
@@ -194,8 +191,8 @@ export async function downloadAndInstall(install: InstallOptions) {
   if (await exists(installVersionDir)) {
     console.log(`${binaryName} ${finalVersion} is already downloaded`)
   } else {
-    await Deno.mkdir(installDir, { recursive: true })
-    await Deno.mkdir(installVersionDir, { recursive: true })
+    await mkdir(installDir, { recursive: true })
+    await mkdir(installVersionDir, { recursive: true })
     for (const fileOptions of files) {
       await downloadAndExtractFile(fileOptions, installVersionDir)
     }

@@ -14,7 +14,7 @@ function requireRepoUrlArg(
   if (!url || typeof url !== 'string') {
     console.error('Error: repo URL is required')
     console.error(`Usage: ppkg repo ${subcommand} <url>`)
-    Deno.exit(1)
+    process.exit(1)
   }
   return url
 }
@@ -49,12 +49,12 @@ async function handleRepoRemove(rest: Array<string | number>): Promise<void> {
   const url = requireRepoUrlArg(rest, 'remove')
   const config = await loadConfig()
   const normalized = normalizeRepoBase(url)
-  const next = config.repos.filter((entry) =>
-    normalizeRepoBase(entry.url) !== normalized
+  const next = config.repos.filter(
+    (entry) => normalizeRepoBase(entry.url) !== normalized,
   )
   if (next.length === config.repos.length) {
     console.error(`Repo not found: ${normalized}`)
-    Deno.exit(1)
+    process.exit(1)
   }
   await saveConfig({ repos: next })
   console.log(`Removed repo: ${normalized}`)
@@ -97,5 +97,5 @@ export async function handleRepoCommand(
   }
 
   console.error('Usage: ppkg repo list|add|remove|update')
-  Deno.exit(1)
+  process.exit(1)
 }

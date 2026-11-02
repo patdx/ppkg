@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>duckdb · @patdx/pkg</title>
+    <title>duckdb · @patdx/ppkg</title>
     <link rel="stylesheet" href="/site.css" />
   </head>
   <body>
@@ -12,11 +12,11 @@
       <h1>duckdb</h1>
       <p>
         First-time setup: install the <code>ppkg</code> CLI once
-        (ensure <code>~/.deno/bin</code> is on your <code>PATH</code>;
+        (ensure <code>npm’s global bin directory</code> is on your <code>PATH</code>;
         see <a href="/">catalog</a> for more):
       </p>
       <div class="cmd">
-        <code>deno install -g -A -n ppkg jsr:@patdx/pkg@0.9.0</code>
+        <code>npm install -g @patdx/ppkg@0.10.0</code>
         <button type="button" class="copy-install">Copy</button>
       </div>
       <p>Then install this package:</p>
@@ -31,12 +31,12 @@
       </div>
       <p>Or without installing the CLI:</p>
       <div class="cmd">
-        <code>deno run -A --reload jsr:@patdx/pkg@0.9.0 add duckdb</code>
+        <code>npx @patdx/ppkg@0.10.0 add duckdb</code>
         <button type="button" class="copy-install">Copy</button>
       </div>
       <div class="links">
         <a href="/package/duckdb.json">Manifest JSON</a>
-        <a href="https://github.com/patdx/dotfiles-public/blob/main/repo/package/duckdb.json">Edit on GitHub</a>
+        <a href="https://github.com/patdx/ppkg/blob/main/repo/package/duckdb.json">Edit on GitHub</a>
       </div>
       <nav><a href="/">← All packages</a></nav>
     </main>
