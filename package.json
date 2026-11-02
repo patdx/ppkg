@@ -49,9 +49,9 @@
     "esbuild": "^0.28.2",
     "ofetch": "^1.5.1",
     "prettier": "^3.9.10",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "valibot": "^1.4.2",
-    "wrangler": "^4.113.0"
+    "wrangler": "^4.156.1"
   },
   "repository": {
     "type": "git",

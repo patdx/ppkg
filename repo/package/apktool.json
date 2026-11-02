@@ -5,13 +5,13 @@
   "binary_name": "apktool",
   "files": [
     {
-      "url": "https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool",
+      "url": "https://raw.githubusercontent.com/iBotPeaches/Apktool/v3.0.3/scripts/linux/apktool",
       "filename": "apktool",
       "type": "raw",
       "executable": true
     },
     {
-      "url": "https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.8.1.jar",
+      "url": "https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar",
       "filename": "apktool.jar",
       "type": "raw"
     }
