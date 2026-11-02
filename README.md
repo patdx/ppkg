@@ -63,7 +63,9 @@ installed directly from URLs and reports provider failures.
 
 ## Development
 
-Use pnpm 12.16.1 (pinned in `packageManager`) for development.
+Use the Node version in `.node-version` and pnpm 12.16.1 (pinned in
+`packageManager`) for development. GitHub Actions and Cloudflare Builds share
+that Node version; CI also checks compatibility with Node 22.
 
 ```sh
 pnpm install --frozen-lockfile

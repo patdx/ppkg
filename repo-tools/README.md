@@ -21,9 +21,11 @@ Connect GitHub repository `patdx/ppkg`, production branch `main`, using:
 - Root directory: `/`
 - Build command: `pnpm run check-schema && pnpm run gen-site`
 - Deploy command: `pnpm exec wrangler deploy`
-- Build environment: `NODE_VERSION=24`, `PNPM_VERSION=12.16.1`
+- Node version: `.node-version` (shared with GitHub Actions)
+- Build environment: `PNPM_VERSION=12.16.1`
 - Watch paths: `repo/**`, `repo-tools/**`, `pkg/**`, `scripts/**`, `package.json`,
-  `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `wrangler.json`
+  `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `wrangler.json`,
+  `.node-version`
 
 Cloudflare installs dependencies before the build using the pnpm lockfile.
 Workers Builds is the catalog deployment owner; there is no separate GitHub
