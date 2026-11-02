@@ -51,24 +51,26 @@ installed directly from URLs and reports provider failures.
 
 ## Development
 
+Use pnpm 12.16.1 (pinned in `packageManager`) for development.
+
 ```sh
-npm ci
-npm test
-npm run check-schema
-npm run format:check
-npm run gen-schema
-npm run gen-site
+pnpm install --frozen-lockfile
+pnpm test
+pnpm run check-schema
+pnpm run format:check
+pnpm run gen-schema
+pnpm run gen-site
 node dist/pkg/cli.js --help
-npm pack
+pnpm pack
 ```
 
-Edit catalog manifests under `repo/package/*.json`, then run `npm run gen-site`.
+Edit catalog manifests under `repo/package/*.json`, then run `pnpm run gen-site`.
 Valibot schemas in `pkg/shared/schema.ts` generate `repo/*.schema.json`.
-`npm run bump-version -- patch` updates package.json, package-lock.json, the CLI
+`pnpm run bump-version patch` updates package.json, the CLI
 version, and generated catalog pages. The catalog minimum CLI version is an
 independent compatibility requirement; change it only when needed.
 
-`npm run deploy:dry` validates the Cloudflare catalog deployment. `npm run deploy`
+`pnpm run deploy:dry` validates the Cloudflare catalog deployment. `pnpm run deploy`
 publishes to the existing Worker and domain; use only after moving deployment
 ownership from dotfiles-public. See [repo-tools](repo-tools/README.md).
 

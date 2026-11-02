@@ -1,4 +1,4 @@
 node_modules/
 dist/
 repo/
-package-lock.json
+pnpm-lock.yaml

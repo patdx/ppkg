@@ -23,15 +23,15 @@
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "npm run build && node --test dist/pkg/*.test.js dist/pkg/shared/*.test.js",
+    "test": "pnpm run build && node --test dist/pkg/*.test.js dist/pkg/shared/*.test.js",
     "check": "tsc --noEmit",
-    "check-schema": "npm run build && node dist/pkg/scripts/check-schema.js",
-    "gen-schema": "npm run build && node dist/pkg/scripts/gen-schema.js",
-    "gen-site": "npm run build && node dist/repo-tools/scripts/gen-site.js",
-    "bump-version": "npm run build && node dist/pkg/scripts/bump-version.js",
-    "deploy": "npm run gen-site && wrangler deploy --config repo-tools/wrangler.json",
-    "deploy:dry": "npm run gen-site && wrangler deploy --config repo-tools/wrangler.json --dry-run",
-    "prepack": "npm run build && node scripts/prepare-package.mjs",
+    "check-schema": "pnpm run build && node dist/pkg/scripts/check-schema.js",
+    "gen-schema": "pnpm run build && node dist/pkg/scripts/gen-schema.js",
+    "gen-site": "pnpm run build && node dist/repo-tools/scripts/gen-site.js",
+    "bump-version": "pnpm run build && node dist/pkg/scripts/bump-version.js",
+    "deploy": "pnpm run gen-site && wrangler deploy --config repo-tools/wrangler.json",
+    "deploy:dry": "pnpm run gen-site && wrangler deploy --config repo-tools/wrangler.json --dry-run",
+    "prepack": "pnpm run build && node scripts/prepare-package.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -53,5 +53,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "packageManager": "pnpm@12.16.1"
 }

@@ -6,10 +6,10 @@ The static catalog and website live in `../repo/`. The site generator updates
 Run commands from the repository root:
 
 ```sh
-npm run gen-site
-npm run check-schema
-npm run deploy:dry
-npm run deploy
+pnpm run gen-site
+pnpm run check-schema
+pnpm run deploy:dry
+pnpm run deploy
 ```
 
 Deployment uses Wrangler and the existing `patdx-pkg-repo` Worker at repo.pmil.me.

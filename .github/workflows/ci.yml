@@ -11,14 +11,15 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
-      - run: npm ci
-      - run: npm run format:check
-      - run: npm test
-      - run: npm run check-schema
-      - run: npm run gen-site
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run format:check
+      - run: pnpm test
+      - run: pnpm run check-schema
+      - run: pnpm run gen-site
       - run: git diff --exit-code -- repo
-      - run: npm pack --dry-run
+      - run: pnpm pack --dry-run

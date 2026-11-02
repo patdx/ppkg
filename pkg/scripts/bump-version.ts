@@ -4,9 +4,9 @@ import { join } from 'node:path'
 import { PROJECT_ROOT } from '../shared/project.ts'
 const target = process.argv[2]
 if (!target || !/^(major|minor|patch|[0-9]+\.[0-9]+\.[0-9]+)$/.test(target)) {
-  throw new Error('Usage: npm run bump-version -- <major|minor|patch|x.y.z>')
+  throw new Error('Usage: pnpm run bump-version <major|minor|patch|x.y.z>')
 }
-execFileSync('npm', ['version', target, '--no-git-tag-version'], {
+execFileSync('pnpm', ['version', target, '--no-git-tag-version'], {
   cwd: PROJECT_ROOT,
   stdio: 'inherit',
 })
@@ -17,7 +17,7 @@ await writeFile(
   join(PROJECT_ROOT, 'pkg/shared/version.ts'),
   `export const PKG_CLI_VERSION = '${version}'\n`,
 )
-execFileSync('npm', ['run', 'gen-site'], {
+execFileSync('pnpm', ['run', 'gen-site'], {
   cwd: PROJECT_ROOT,
   stdio: 'inherit',
 })
