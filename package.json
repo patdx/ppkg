@@ -23,7 +23,7 @@
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "pnpm run build && node --test dist/pkg/*.test.js dist/pkg/shared/*.test.js",
+    "test": "pnpm run build && node --test dist/pkg/*.test.js dist/pkg/shared/*.test.js scripts/*.test.mjs",
     "check": "tsc --noEmit",
     "check-schema": "pnpm run build && node dist/pkg/scripts/check-schema.js",
     "gen-schema": "pnpm run build && node dist/pkg/scripts/gen-schema.js",

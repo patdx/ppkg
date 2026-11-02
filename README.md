@@ -81,6 +81,34 @@ retaining history for `pkg/`, `repo/`, `repo-tools/`, and catalog deployment CI.
 The old repository and its JSR releases are unchanged. The new npm package name
 is `@patdx/ppkg`; historical Deno releases remain `@patdx/pkg` on JSR.
 
-The default CI validates changes and builds a package. Publishing and catalog
-deployment are manual workflows. Configure npm trusted publishing before using
-the publish workflow, and transfer catalog deployment secrets before deploying.
+## CI and releases
+
+Pull requests and branch pushes run tests on Node.js 22 and 24 across Linux and
+macOS, check formatting and schemas, verify generated catalog pages, and build a
+package. Pushes to `main` run those same checks through the Release workflow.
+After all four jobs pass, Release publishes the version in `package.json` if it
+is not already on npm. Existing versions are skipped. Registry failures stop the
+release rather than treating the version as missing.
+
+To release:
+
+```sh
+pnpm run bump-version patch
+git add .
+git commit -m "Release next ppkg version"
+git push origin main
+```
+
+The bump command synchronizes `package.json`, the CLI version, and catalog HTML.
+No Git tag or manual workflow run is required. The Release workflow can also be
+run manually on `main` to retry a failed publish.
+
+Publishing uses npm trusted publishing (OIDC) and provenance: npm links each new
+release to its GitHub source commit and build workflow. The trusted publisher for
+`@patdx/ppkg` must authorize GitHub owner `patdx`, repository `ppkg`, and workflow
+`publish.yml`, with direct publishing allowed and no environment restriction.
+Builds and packaging use pnpm; npm's CLI uploads the completed tarball with
+`--provenance`. No npm token is stored in GitHub.
+
+Catalog deployment remains manual. Transfer its secrets and deployment ownership
+from dotfiles-public before running the deployment workflow.

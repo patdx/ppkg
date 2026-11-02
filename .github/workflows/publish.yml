@@ -1,8 +1,22 @@
-name: Publish npm package
+name: Release
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+
 jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
   publish:
+    needs: checks
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -13,9 +27,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm test
-      - run: pnpm run check-schema
-      - run: pnpm publish --access public --provenance
+      - name: Check whether this version is already published
+        id: release
+        run: node scripts/check-release.mjs
+      - name: Install dependencies
+        if: steps.release.outputs.publish == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: Build release tarball
+        if: steps.release.outputs.publish == 'true'
+        run: pnpm pack --pack-destination release
+      - name: Publish with npm provenance
+        if: steps.release.outputs.publish == 'true'
+        run: npm publish release/*.tgz --access public --provenance
