@@ -1,0 +1,16 @@
+{
+  "$schema": "https://repo.pmil.me/package.schema.json",
+  "version": 1,
+  "name": "openpencil",
+  "binary_name": "openpencil",
+  "files": [
+    {
+      "url": "https://github.com/open-pencil/open-pencil",
+      "url_provider": "github",
+      "github_asset": "OpenPencil_*_amd64.AppImage",
+      "filename": "openpencil",
+      "type": "raw",
+      "executable": true
+    }
+  ]
+}

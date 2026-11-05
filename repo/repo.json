@@ -9,6 +9,7 @@
     "duckdb",
     "git-credential-manager",
     "lazygit",
+    "openpencil",
     "windsurf"
   ],
   "min_cli_version": "0.12.0"
